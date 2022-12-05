@@ -7,10 +7,8 @@ public class BSPNode
 {
     BSPNode? left, right;
     Rectangle rect;
-    int[,] room;
 
     public Rectangle Rect { get { return rect; } }
-    public int[,] Room { get { return room; } set { room = value; } }
     public BSPNode? Left { get { return left; } set { left = value; } }
     public BSPNode? Right { get { return right; } set { right = value; } }
 
@@ -18,35 +16,18 @@ public class BSPNode
     public BSPNode(Rectangle rect)
     {
         this.rect = rect;
-        this.room = new int[rect.Height, rect.Width];
-
-        for (int y = 0; y < rect.Height; ++y)
-        {
-            for (int x = 0; x < rect.Width; ++x)
-            {
-                room[y, x] = (int)BSP_TILE_TYPE.WALL;
-            }
-        }
 
         left = null;
         right = null;
-    }
-
-    public void CreateRoom()
-    {
-        Random rand = new Random();
-
-        // 1. 자신의 크기보다 작은 방을 생성
-
     }
 }
 
 public class BSPTree
 {
-
     private BSPNode root;                   // 트리 부모
     private int boardWidth, boardHeight;    // 보드 사이즈
     private int roomWidth, roomHeight;      // 룸 최소 사이즈
+    private int[,] room;
 
     public BSPTree(int boardWidth, int boardHeight, int roomWidth, int roomHeight)
     {
@@ -56,6 +37,15 @@ public class BSPTree
         this.boardHeight = boardHeight;
         this.roomWidth = roomWidth;
         this.roomHeight = roomHeight;
+        this.room = new int[rect.Height, rect.Width];
+
+        for (int y = 0; y < rect.Height; ++y)
+        {
+            for (int x = 0; x < rect.Width; ++x)
+            {
+                room[y, x] = (int)BSP_TILE_TYPE.WALL;
+            }
+        }
 
         SplitRoom(root);
     }
@@ -76,38 +66,35 @@ public class BSPTree
         // 반복할 때마다 결과물을 BSP 노드에 저장한다.
 
         if (node is null) return;
-        if (node.Rect.Width <= roomWidth) return;
-        if (node.Rect.Height <= roomHeight) return;
-
+        
+        // Left 탈락 조건
         int offsetX, offsetY;
-        Random rand = new Random();
+        offsetX = (node.Rect.Width - node.Rect.X) / 2;
+        offsetY = (node.Rect.Height - node.Rect.Y) / 2;
+        if (offsetX <= roomWidth || offsetY <= roomHeight) return;
+        
 
-        // 1. 0, 1 을 랜덤으로 나눠 수직, 수평을 분할한다.
+
+        Random rand = new Random();
         int dir = rand.Next(0, 2);
         if (dir is (int)BSP_SPLIT_DIR.HORIZONTAL)
         {
-            offsetX = (node.Rect.Width - node.Rect.X) / 2 + rand.Next(-roomWidth, roomWidth + 1);
-            offsetX = Clamp(roomWidth + 1, node.Rect.Width, offsetX);
+            Rectangle newLeftRect = new Rectangle(node.Rect.X, node.Rect.Y, node.Rect.Width, offsetY - 1);
+            BSPNode newLeftNode = new BSPNode(newLeftRect);
 
-            Rectangle leftRect = new Rectangle(0, 0, offsetX - 1, node.Rect.Height - 1);
-            BSPNode newLeftNode = new BSPNode(leftRect);
-
-            Rectangle rightRect = new Rectangle(offsetX, 0, node.Rect.Width - 1, node.Rect.Height - 1);
-            BSPNode newRightNode = new BSPNode(rightRect);
+            Rectangle newRightRect = new Rectangle(node.Rect.X, offsetY, node.Rect.Width, node.Rect.Height);
+            BSPNode newRightNode = new BSPNode(newRightRect);
 
             node.Left = newLeftNode;
             node.Right = newRightNode;
         }
         else if (dir is (int)BSP_SPLIT_DIR.VERTICAL)
         {
-            offsetY = (node.Rect.Height - node.Rect.Y) / 2 + rand.Next(-roomHeight, roomHeight + 1);
-            offsetY = Clamp(roomHeight + 1, node.Rect.Height, offsetY);
-            
-            Rectangle leftRect = new Rectangle(0, 0, node.Rect.Width - 1, offsetY - 1);
-            BSPNode newLeftNode = new BSPNode(leftRect);
+            Rectangle newLeftRect = new Rectangle(node.Rect.X, node.Rect.Y, offsetX - 1, node.Rect.Height);
+            BSPNode newLeftNode = new BSPNode(newLeftRect);
 
-            Rectangle rightRect = new Rectangle(0, offsetY, node.Rect.Width - 1, node.Rect.Height - 1);
-            BSPNode newRightNode = new BSPNode(rightRect);
+            Rectangle newRightRect = new Rectangle(offsetX, node.Rect.Y, node.Rect.Width, node.Rect.Height);
+            BSPNode newRightNode = new BSPNode(newRightRect);
 
             node.Left = newLeftNode;
             node.Right = newRightNode;
@@ -115,6 +102,32 @@ public class BSPTree
 
         SplitRoom(node.Left);
         SplitRoom(node.Right);
+    }
+
+    private void BuildRoom()
+    {
+
+    }
+
+    public void PrintNode()
+    {
+        if (root == null) return;
+
+        BSPNode? newNode = root.Left;
+        Console.WriteLine("left\n");
+        while (newNode != null)
+        {
+            Console.WriteLine(newNode.Rect.ToString());
+            newNode = newNode.Left;
+        }
+
+        Console.WriteLine("right\n");
+        newNode = root.Right;
+        while (newNode != null)
+        {
+            Console.WriteLine(newNode.Rect.ToString());
+            newNode = newNode.Right;
+        }
     }
 
     public int Clamp(int min, int max, int value)
@@ -130,6 +143,6 @@ public class Program
     public static void Main(string[] args)
     {
         BSPTree bsp = new BSPTree(35, 35, 6, 6);
-        
+        bsp.PrintNode();
     }
 }

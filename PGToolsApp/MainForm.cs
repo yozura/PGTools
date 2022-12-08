@@ -4,6 +4,8 @@ using System.Windows.Forms;
 
 namespace PGToolsApp
 {
+    public enum PG_ALGORITHM { BSP = 0, CA, PN };
+
     public partial class MainForm : Form
     {
         public MainForm()
@@ -13,8 +15,6 @@ namespace PGToolsApp
 
         Dictionary<int, string> dictAlgo;
         List<Panel> listAlgoPanel;
-
-        public enum PG_ALGORITHM { BSP = 0, CA, PN };
 
         private void MainForm_Load(object sender, System.EventArgs e)
         {
@@ -124,6 +124,7 @@ namespace PGToolsApp
             GenForm genForm = new GenForm();
             genForm.BitmapBoard = ca.Room;
             genForm.TCA = tca;
+            genForm.CurrentAlgorithm = PG_ALGORITHM.CA;
             genForm.ShowDialog();
         }
 

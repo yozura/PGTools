@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace PGToolsApp
 {
@@ -16,8 +17,8 @@ namespace PGToolsApp
     public class CA
     {
         int roomWidth, roomHeight;
-        int count;
-        double ratio;
+        int runCount;
+        double wallRatio;
         int[,] room;
 
         public int[,] Room { get { return room; } }
@@ -26,8 +27,8 @@ namespace PGToolsApp
         {
             this.roomWidth = roomWidth;
             this.roomHeight = roomHeight;
-            this.ratio = ratio;
-            this.count = count;
+            this.wallRatio = ratio;
+            this.runCount = count;
 
             room = new int[roomHeight, roomWidth];
         }
@@ -36,8 +37,8 @@ namespace PGToolsApp
         {
             this.roomWidth = tca.RoomWidth;
             this.roomHeight = tca.RoomHeight;
-            this.ratio = tca.WallRatio;
-            this.count = tca.RunCount;
+            this.wallRatio = tca.WallRatio;
+            this.runCount = tca.RunCount;
 
             room = new int[roomHeight, roomWidth];
         }
@@ -49,70 +50,55 @@ namespace PGToolsApp
             {
                 for (int x = 0; x < roomWidth; ++x)
                 {
-                    if (rand.NextDouble() >= this.ratio) room[y, x] = (int)CA_TILE_TYPE.EMPTY;
+                    if (y == 0 || y >= roomHeight - 1 || x == 0 || x >= roomWidth - 1)
+                    {
+                        room[y, x] = (int)CA_TILE_TYPE.WALL;
+                        continue;
+                    }
+
+                    if (rand.NextDouble() >= this.wallRatio) room[y, x] = (int)CA_TILE_TYPE.EMPTY;
                     else room[y, x] = (int)CA_TILE_TYPE.WALL;
                 }
             }
 
-            for (int i = 0; i < count; ++i)
+            // 전체 랜덤
+            int limitCount;
+            int randY, randX;
+            for (int i = 0; i < runCount; ++i)
             {
                 for (int y = 0; y < roomHeight; ++y)
                 {
                     for (int x = 0; x < roomWidth; ++x)
                     {
-                        int limitCount = 0;
-                        int randY, randX;
-
+                        limitCount = 0;
                         randY = rand.Next(1, roomHeight - 1);
                         randX = rand.Next(1, roomWidth - 1);
-
-                        // Top Left, Top Center, Top Right
-                        if (room[randY - 1, randX - 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
-                        if (room[randY - 1, randX] == (int)CA_TILE_TYPE.WALL) ++limitCount;
-                        if (room[randY - 1, randX + 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
-
-                        // Middle Left, Middle Center, Middle Right
-                        if (room[randY, randX - 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
-                        if (room[randY, randX] == (int)CA_TILE_TYPE.WALL) ++limitCount;
-                        if (room[randY, randX + 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
-
-                        // Bottom Left, Bottom Center, Bottom Right
-                        if (room[randY + 1, randX - 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
-                        if (room[randY + 1, randX] == (int)CA_TILE_TYPE.WALL) ++limitCount;
-                        if (room[randY + 1, randX + 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
-
-                        // 만약 5칸 이상이 벽일 경우 자기 자신도 벽으로 치환, 아닐 경우 비우기
-                        if (limitCount >= 5) room[randY, randX] = (int)CA_TILE_TYPE.WALL;
-                        else room[randY, randX] = (int)CA_TILE_TYPE.EMPTY;
+                        SelectCoordinate(randX, randY, ref limitCount);
                     }
                 }
-                LogRoom();
             }
         }
 
-        private void LogRoom()
+        private void SelectCoordinate(int x, int y, ref int limitCount)
         {
-            using (StreamWriter sw = new StreamWriter("CALog.txt", true))
-            {
-                sw.WriteLine();
-                for (int y = 0; y < roomHeight; ++y)
-                {
-                    for (int x = 0; x < roomWidth; ++x)
-                    {
-                        switch (room[y, x])
-                        {
-                            case (int)CA_TILE_TYPE.EMPTY:
-                                sw.Write("□");
-                                break;
-                            case (int)CA_TILE_TYPE.WALL:
-                                sw.Write("■");
-                                break;
-                        }
-                    }
-                    sw.WriteLine();
-                }
-                sw.WriteLine();
-            }
+            // Top Left, Top Center, Top Right
+            if (room[y - 1, x - 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
+            if (room[y - 1, x] == (int)CA_TILE_TYPE.WALL) ++limitCount;
+            if (room[y - 1, x + 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
+
+            // Middle Left, Middle Center, Middle Right
+            if (room[y, x - 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
+            if (room[y, x] == (int)CA_TILE_TYPE.WALL) ++limitCount;
+            if (room[y, x + 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
+
+            // Bottom Left, Bottom Center, Bottom Right
+            if (room[y + 1, x - 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
+            if (room[y + 1, x] == (int)CA_TILE_TYPE.WALL) ++limitCount;
+            if (room[y + 1, x + 1] == (int)CA_TILE_TYPE.WALL) ++limitCount;
+
+            // 만약 5칸 이상이 벽일 경우 자기 자신도 벽으로 치환, 아닐 경우 비우기
+            if (limitCount >= 5) room[y, x] = (int)CA_TILE_TYPE.WALL;
+            else room[y, x] = (int)CA_TILE_TYPE.EMPTY;
         }
     }
 }

@@ -28,12 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GenForm));
             this.btnSave = new System.Windows.Forms.Button();
             this.btnRedraw = new System.Windows.Forms.Button();
             this.btnExit = new System.Windows.Forms.Button();
-            this.panelBitmap = new System.Windows.Forms.Panel();
             this.panelBtns = new System.Windows.Forms.Panel();
+            this.pbBitmap = new System.Windows.Forms.PictureBox();
             this.panelBtns.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbBitmap)).BeginInit();
             this.SuspendLayout();
             // 
             // btnSave
@@ -66,15 +68,6 @@
             this.btnExit.UseVisualStyleBackColor = true;
             this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
             // 
-            // panelBitmap
-            // 
-            this.panelBitmap.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelBitmap.Location = new System.Drawing.Point(0, 0);
-            this.panelBitmap.Name = "panelBitmap";
-            this.panelBitmap.Size = new System.Drawing.Size(528, 448);
-            this.panelBitmap.TabIndex = 0;
-            this.panelBitmap.Paint += new System.Windows.Forms.PaintEventHandler(this.panelBitmap_Paint);
-            // 
             // panelBtns
             // 
             this.panelBtns.Controls.Add(this.btnSave);
@@ -86,18 +79,31 @@
             this.panelBtns.Size = new System.Drawing.Size(139, 448);
             this.panelBtns.TabIndex = 4;
             // 
+            // pbBitmap
+            // 
+            this.pbBitmap.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pbBitmap.Location = new System.Drawing.Point(0, 0);
+            this.pbBitmap.Name = "pbBitmap";
+            this.pbBitmap.Size = new System.Drawing.Size(389, 448);
+            this.pbBitmap.TabIndex = 5;
+            this.pbBitmap.TabStop = false;
+            this.pbBitmap.Paint += pbBitmap_Paint;
+            // 
             // GenForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(528, 448);
+            this.Controls.Add(this.pbBitmap);
             this.Controls.Add(this.panelBtns);
-            this.Controls.Add(this.panelBitmap);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "GenForm";
             this.Text = "PGTools";
             this.Load += new System.EventHandler(this.GenForm_Load);
             this.panelBtns.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pbBitmap)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -106,7 +112,7 @@
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnRedraw;
         private System.Windows.Forms.Button btnExit;
-        private System.Windows.Forms.Panel panelBitmap;
         private System.Windows.Forms.Panel panelBtns;
+        private System.Windows.Forms.PictureBox pbBitmap;
     }
 }

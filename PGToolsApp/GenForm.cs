@@ -1,6 +1,8 @@
-﻿using System.Drawing;
-using System.Threading;
+﻿using System;
+using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
+using System.Drawing.Imaging;
 
 namespace PGToolsApp
 {
@@ -12,46 +14,45 @@ namespace PGToolsApp
         }
 
         public int[,] BitmapBoard { get; set; }
-        public int PixelWidth { get; set; }
-        public int PixelHeight { get; set; }
+        public static int PixelWidth { get; set; }
+        public static int PixelHeight { get; set; }
 
         // 세포 자동자 전용 구조체
         public TagCA TCA { get; set; }
+        public TagPN TPN { get; set; }
 
         public PG_ALGORITHM CurrentAlgorithm { get; set; }
         
         private void GenForm_Load(object sender, System.EventArgs e)
         {
-            this.DoubleBuffered = true;
-
-            PixelWidth = 5;
-            PixelHeight = 5;
-
+            int bitmapWidth, bitmapHeight;
+            bitmapWidth = bitmapHeight = 256;
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
                 // 미완성
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
-                int bitmapWidth = TCA.RoomWidth * PixelWidth;
-                int bitmapHeight = TCA.RoomHeight * PixelHeight;
-                
-                this.Size = new Size(bitmapWidth + panelBtns.Size.Width, bitmapHeight);
-                int diff = bitmapHeight - ClientSize.Height;
-
-                this.Size = new Size(bitmapWidth + panelBtns.Size.Width, bitmapHeight + diff);
-                panelBitmap.Size = new Size(bitmapWidth, bitmapHeight);
+                bitmapWidth = TCA.RoomWidth * PixelWidth;
+                bitmapHeight = TCA.RoomHeight * PixelHeight;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                // 미완성
+                bitmapWidth = TPN.RoomWidth * PixelWidth;
+                bitmapHeight = TPN.RoomHeight * PixelHeight;
             }
+
+            this.Size = new Size(bitmapWidth + panelBtns.Size.Width, bitmapHeight);
+            int diff = bitmapHeight - ClientSize.Height;
+
+            this.Size = new Size(bitmapWidth + panelBtns.Size.Width, bitmapHeight + diff);
+            pbBitmap.Size = new Size(bitmapWidth, bitmapHeight);
         }
 
-        private void panelBitmap_Paint(object sender, PaintEventArgs e)
+        private void pbBitmap_Paint(object sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-            g.Clear(Color.White);
+            Graphics graphics = e.Graphics;
+            graphics.Clear(Color.White);
 
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
@@ -66,10 +67,10 @@ namespace PGToolsApp
                         switch (BitmapBoard[y, x])
                         {
                             case (int)CA_TILE_TYPE.EMPTY:
-                                g.DrawRectangle(Pens.White, x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
+                                graphics.DrawRectangle(Pens.White, x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
                                 break;
                             case (int)CA_TILE_TYPE.WALL:
-                                g.FillRectangle(Brushes.Black, x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
+                                graphics.FillRectangle(Brushes.Black, x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
                                 break;
                         }
                     }
@@ -77,14 +78,30 @@ namespace PGToolsApp
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                // 미완성
+                for (int y = 0; y < TPN.RoomHeight; ++y)
+                {
+                    for (int x = 0; x < TPN.RoomWidth; ++x)
+                    {
+                        graphics.FillRectangle(new SolidBrush(Color.FromArgb(BitmapBoard[y, x], Color.Black)), x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
+                    }
+                }
             }
-
         }
 
         private void btnSave_Click(object sender, System.EventArgs e)
         {
+            if (CurrentAlgorithm == PG_ALGORITHM.BSP)
+            {
 
+            }
+            else if (CurrentAlgorithm == PG_ALGORITHM.CA)
+            {
+                SaveCA();
+            }
+            else if (CurrentAlgorithm == PG_ALGORITHM.PN)
+            {
+                SavePN();
+            }
         }
 
         private void btnRedraw_Click(object sender, System.EventArgs e)
@@ -98,17 +115,22 @@ namespace PGToolsApp
                 btnSave.Enabled = false;
                 btnRedraw.Enabled = false;
 
-                Thread t = new Thread(new ThreadStart(Redarw_CA));
-                t.Start();
-                t.Join();
-
+                RedrawCA();
                 Refresh();
+
                 btnSave.Enabled = true;
                 btnRedraw.Enabled = true;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                // 미완성
+                btnSave.Enabled = false;
+                btnRedraw.Enabled = false;
+
+                RedrawPN();
+                Refresh();
+
+                btnSave.Enabled = true;
+                btnRedraw.Enabled = true;
             }
         }
 
@@ -117,12 +139,112 @@ namespace PGToolsApp
             Close();
         }
 
-        private void Redarw_CA()
+        private void RedrawCA()
         {
             CA ca = new CA(TCA);
             ca.Generate();
-
             BitmapBoard = ca.Room;
+        }
+
+        private void RedrawPN()
+        {
+            PN pn = new PN();
+            TPN.Room = pn.GeneratePerlinNoise(pn.GenerateWhiteNoise(TPN.RoomWidth, TPN.RoomHeight), TPN.OctaveCount);
+            for (int y = 0; y < TPN.RoomWidth; ++y)
+            {
+                for (int x = 0; x < TPN.RoomHeight; ++x)
+                {
+                    int alpha = Math.Abs((int)(TPN.Room[y][x] * 255));
+                    BitmapBoard[y, x] = alpha;
+                }
+            }
+        }
+
+        private void SaveCA()
+        {
+            // txt 파일로 저장 -> Wall은 1, Empty는 0
+            // png 파일로 저장 가능
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.InitialDirectory = "C:\\";
+            sfd.Filter = "txt files (*.txt)|*.txt|png files (*.png)|*.png|All Files (*.*)|*.*";
+            sfd.FilterIndex = 1;
+            sfd.RestoreDirectory = true;
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                string path = sfd.FileName;
+                string extension = Path.GetExtension(path);
+                if (extension == ".txt")
+                {
+                    using (StreamWriter sw = new StreamWriter(path))
+                    {
+                        sw.Write(TCA.RoomHeight);
+                        sw.WriteLine();
+                        sw.Write(TCA.RoomWidth);
+                        sw.WriteLine();
+                        for (int y = 0; y < TCA.RoomHeight; ++y)
+                        {
+                            for (int x = 0; x < TCA.RoomWidth; ++x)
+                            {
+                                sw.Write(BitmapBoard[y, x]);
+                            }
+                            sw.WriteLine();
+                        }
+                    }
+                }
+                else
+                {
+                    using (Bitmap bitmap = new Bitmap(pbBitmap.Width, pbBitmap.Height))
+                    {
+                        pbBitmap.DrawToBitmap(bitmap, pbBitmap.ClientRectangle);
+                        ImageFormat format = null;
+                        switch (extension)
+                        {
+                            case ".bmp": format = ImageFormat.Bmp; break;
+                            case ".png": format = ImageFormat.Png; break;
+                            case ".jpeg":
+                            case ".jpg": format = ImageFormat.Jpeg; break;
+                            case ".gif": format = ImageFormat.Gif; break;
+                        }
+                        bitmap.Save(path, format);
+                    }
+                }
+
+                MessageBox.Show($"{path} 파일 저장에 성공했습니다.");
+            }
+        }
+
+        private void SavePN()
+        {
+            // png 파일로 저장
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.InitialDirectory = "C:\\";
+            sfd.Filter = "bmp file (*.bmp)|*.bmp|png file (*.png)|*.png|All Files (*.*)|*.*";
+            sfd.FilterIndex = 1;
+            sfd.AddExtension = true;
+            sfd.RestoreDirectory = true;
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                string path = sfd.FileName;
+                using (Bitmap bitmap = new Bitmap(pbBitmap.Width, pbBitmap.Height))
+                {
+                    pbBitmap.DrawToBitmap(bitmap, pbBitmap.ClientRectangle);
+                    ImageFormat format = null;
+                    string extension = Path.GetExtension(path);
+                    switch (extension)
+                    {
+                        case ".bmp": format = ImageFormat.Bmp; break;
+                        case ".png": format = ImageFormat.Png; break;
+                        case ".jpeg":
+                        case ".jpg": format = ImageFormat.Jpeg; break;
+                        case ".gif": format = ImageFormat.Gif; break;
+                    }
+                    bitmap.Save(path, format);
+                }
+
+                MessageBox.Show($"{path} 파일 저장에 성공했습니다.");
+            }
         }
     }
 }

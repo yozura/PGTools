@@ -16,9 +16,9 @@ namespace PGToolsApp
         public float[][] GenerateWhiteNoise(int width, int height)
         {
             Random random = new Random();
-            float[][] noise = new float[width][];
-            for (int i = 0; i < width; ++i)
-                noise[i] = new float[height];
+            float[][] noise = new float[height][];
+            for (int i = 0; i < height; ++i)
+                noise[i] = new float[width];
 
             for (int y = 0; y < height; y++)
             {
@@ -31,42 +31,39 @@ namespace PGToolsApp
             return noise;
         }
 
+        // 이전에 생성한 노이즈를 보간해서 리턴하는 함수
         public float[][] GenerateSmoothNoise(float[][] baseNoise, int octave)
         {
-            int width = baseNoise.Length;
-            int height = baseNoise[0].Length;
+            int height = baseNoise.Length;
+            int width = baseNoise[0].Length;
 
-            float[][] smoothNoise = new float[width][];
-            for (int i = 0; i < width; ++i)
-                smoothNoise[i] = new float[height];
+            float[][] smoothNoise = new float[height][];
+            for (int i = 0; i < height; ++i)
+                smoothNoise[i] = new float[width];
 
-            int samplePeriod = 1 << octave; // calculates 2 ^ k
+            // 2의 octave 곱을 저장, int형이기 때문에 32제곱을 넘을 수 없음.
+            int samplePeriod = 1 << octave;
             float sampleFrequency = 1.0f / samplePeriod;
 
             for (int y = 0; y < height; y++)
             {
-                //calculate the horizontal sampling indices
                 int sample_i0 = (y / samplePeriod) * samplePeriod;
-                int sample_i1 = (sample_i0 + samplePeriod) % height; //wrap around
+                int sample_i1 = (sample_i0 + samplePeriod) % height;
                 float horizontal_blend = (y - sample_i0) * sampleFrequency;
 
                 for (int x = 0; x < width; x++)
                 {
-                    //calculate the vertical sampling indices
                     int sample_j0 = (x / samplePeriod) * samplePeriod;
-                    int sample_j1 = (sample_j0 + samplePeriod) % width; //wrap around
+                    int sample_j1 = (sample_j0 + samplePeriod) % width;
                     float vertical_blend = (x - sample_j0) * sampleFrequency;
 
-                    //blend the top two corners
-                    float top = Interpolate(baseNoise[sample_i0][sample_j0],
+                    float top = CosInterpolate(baseNoise[sample_i0][sample_j0],
                        baseNoise[sample_i1][sample_j0], horizontal_blend);
 
-                    //blend the bottom two corners
-                    float bottom = Interpolate(baseNoise[sample_i0][sample_j1],
+                    float bottom = CosInterpolate(baseNoise[sample_i0][sample_j1],
                        baseNoise[sample_i1][sample_j1], horizontal_blend);
 
-                    //final blend
-                    smoothNoise[y][x] = Interpolate(top, bottom, vertical_blend);
+                    smoothNoise[y][x] = CosInterpolate(top, bottom, vertical_blend);
                 }
             }
 
@@ -78,24 +75,25 @@ namespace PGToolsApp
             int width = baseNoise.Length;
             int height = baseNoise[0].Length;
 
-            float[][][] smoothNoise = new float[octaveCount][][]; //an array of 2D arrays containing
+            float[][][] smoothNoise = new float[octaveCount][][];
 
+            // 지속성 여부를 결정
             float persistance = 0.5f;
 
-            //generate smooth noise
+            // 스무스 노이즈를 생성함.
             for (int i = 0; i < octaveCount; i++)
-            {
                 smoothNoise[i] = GenerateSmoothNoise(baseNoise, i);
-            }
 
             float[][] perlinNoise = new float[width][];
             for (int i = 0; i < width; ++i)
                 perlinNoise[i] = new float[height];
 
+            // 진폭 결정
             float amplitude = 1.0f;
+            // 전체 진폭 결정
             float totalAmplitude = 0.0f;
 
-            //blend noise together
+            // 옥타브 카운트 만큼 스무스 노이즈를 펄린 노이즈에 누적시킵니다.
             for (int octave = octaveCount - 1; octave >= 0; octave--)
             {
                 amplitude *= persistance;
@@ -110,7 +108,7 @@ namespace PGToolsApp
                 }
             }
 
-            //normalisation
+            // 전체 진폭으로 펄린 노이즈를 정규화시킵니다.
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -122,9 +120,22 @@ namespace PGToolsApp
             return perlinNoise;
         }
 
-        private float Interpolate(float x0, float x1, float alpha)
+        // 선형 보간법입니다.
+        // v0에서 v1까지 a의 비율만큼 보간합니다.
+        private float LinearInterpolate(float v0, float v1, float a)
         {
-            return x0 * (1 - alpha) + alpha * x1;
+            return v0 * (1.0f - a) + a * v1;
+        }
+
+        // 코사인 보간법입니다.
+        // a의 비율을 파이로 곱한뒤 각도를 구하고
+        // 그 각도의 코사인값을 구한 뒤 1에서 코사인값을 뺀 뒤 0.5f를 곱합니다.
+        // v0에서 v1까지 t의 비율만큼 보간합니다.
+        private float CosInterpolate(float v0, float v1, float a)
+        {
+            float angle = (float)(a * Math.PI);
+            float t = (float)((1.0f - Math.Cos(angle)) * 0.5f);
+            return v0 * (1.0f - t) + v1 * t;
         }
     }
 }

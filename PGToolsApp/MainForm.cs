@@ -74,7 +74,32 @@ namespace PGToolsApp
         {
             switch (cbAlgo.SelectedIndex)
             {
-                case (int)PG_ALGORITHM.BSP: RunBSP(); break;
+                case (int)PG_ALGORITHM.BSP: 
+                    {
+                        int roomWidth, roomHeight, depth;
+                        if (!int.TryParse(tbBSPWidth.Text, out roomWidth))
+                        {
+                            MessageBox.Show("너비 입력이 잘못되었습니다. 숫자를 입력해주세요.");
+                            break;
+                        }
+                        if (!int.TryParse(tbBSPHeight.Text, out roomHeight))
+                        {
+                            MessageBox.Show("높이 입력이 잘못되었습니다. 숫자를 입력해주세요.");
+                            break;
+                        }
+                        if (!int.TryParse(cbBSPDepthCount.Text, out depth))
+                        {
+                            MessageBox.Show("옥타브 입력이 잘못되었습니다. 숫자를 입력해주세요.");
+                            break;
+                        }
+
+                        TagBSP tbsp = new TagBSP();
+                        tbsp.RoomWidth = roomWidth;
+                        tbsp.RoomHeight = roomHeight;
+                        tbsp.Depth = depth;
+                        RunBSP(tbsp);
+                    }
+                    break;
                 case (int)PG_ALGORITHM.CA:
                     {
                         int roomWidth, roomHeight, runCount;
@@ -137,9 +162,18 @@ namespace PGToolsApp
             }
         }
 
-        private void RunBSP()
+        private void RunBSP(object obj)
         {
-            MessageBox.Show("미완성, 제작중");
+            TagBSP tbsp = (TagBSP)obj;
+            BSP bsp = new BSP(tbsp.RoomWidth, tbsp.RoomHeight, tbsp.Depth);
+            bsp.GenerateRoom();
+
+            // 새로운 폼에서 보여주기
+            GenForm genForm = new GenForm();
+            genForm.BitmapBoard = bsp.Room;
+            genForm.TBSP = tbsp;
+            genForm.CurrentAlgorithm = PG_ALGORITHM.BSP;
+            genForm.ShowDialog();
         }
 
         private void RunCA(object obj)

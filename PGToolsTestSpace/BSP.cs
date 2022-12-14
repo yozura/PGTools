@@ -2,7 +2,6 @@
 
 namespace PGToolsTestSpace
 {
-    public enum BSP_TILE_TYPE { EMPTY = 0, WALL, CORRIDOR }
     public enum BSP_SPLIT_DIR { HORIZONTAL = 0, VERTICAL }
 
     public class BSPNode

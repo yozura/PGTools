@@ -34,6 +34,7 @@
             this.btnOpt = new System.Windows.Forms.Button();
             this.panelBSP = new System.Windows.Forms.Panel();
             this.panelCA = new System.Windows.Forms.Panel();
+            this.cbCARunCount = new System.Windows.Forms.ComboBox();
             this.lbCARunCount = new System.Windows.Forms.Label();
             this.lbCAWallRatio = new System.Windows.Forms.Label();
             this.tbCAWallRatio = new System.Windows.Forms.TextBox();
@@ -42,14 +43,18 @@
             this.lbCAWidth = new System.Windows.Forms.Label();
             this.tbCAWidth = new System.Windows.Forms.TextBox();
             this.panelPN = new System.Windows.Forms.Panel();
+            this.cbPNOctaveCount = new System.Windows.Forms.ComboBox();
             this.lbPNOctaveCount = new System.Windows.Forms.Label();
             this.lbPNHeight = new System.Windows.Forms.Label();
             this.tbPNHeight = new System.Windows.Forms.TextBox();
             this.lbPNWidth = new System.Windows.Forms.Label();
             this.tbPNWidth = new System.Windows.Forms.TextBox();
-            this.cbPNOctaveCount = new System.Windows.Forms.ComboBox();
-            this.cbCARunCount = new System.Windows.Forms.ComboBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.cbBSPDepthCount = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.tbBSPHeight = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.tbBSPWidth = new System.Windows.Forms.TextBox();
             this.panelBSP.SuspendLayout();
             this.panelCA.SuspendLayout();
             this.panelPN.SuspendLayout();
@@ -88,7 +93,12 @@
             // panelBSP
             // 
             this.panelBSP.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelBSP.Controls.Add(this.button1);
+            this.panelBSP.Controls.Add(this.cbBSPDepthCount);
+            this.panelBSP.Controls.Add(this.label1);
+            this.panelBSP.Controls.Add(this.label2);
+            this.panelBSP.Controls.Add(this.tbBSPHeight);
+            this.panelBSP.Controls.Add(this.label3);
+            this.panelBSP.Controls.Add(this.tbBSPWidth);
             this.panelBSP.Location = new System.Drawing.Point(12, 38);
             this.panelBSP.Name = "panelBSP";
             this.panelBSP.Size = new System.Drawing.Size(338, 252);
@@ -110,6 +120,67 @@
             this.panelCA.Size = new System.Drawing.Size(338, 252);
             this.panelCA.TabIndex = 7;
             this.panelCA.Visible = false;
+            // 
+            // cbCARunCount
+            // 
+            this.cbCARunCount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbCARunCount.FormattingEnabled = true;
+            this.cbCARunCount.Items.AddRange(new object[] {
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "31",
+            "32",
+            "33",
+            "34",
+            "35",
+            "36",
+            "37",
+            "38",
+            "39",
+            "40",
+            "41",
+            "42",
+            "43",
+            "44",
+            "45",
+            "46",
+            "47",
+            "48",
+            "49",
+            "50"});
+            this.cbCARunCount.Location = new System.Drawing.Point(94, 87);
+            this.cbCARunCount.Name = "cbCARunCount";
+            this.cbCARunCount.Size = new System.Drawing.Size(72, 20);
+            this.cbCARunCount.TabIndex = 9;
             // 
             // lbCARunCount
             // 
@@ -186,6 +257,48 @@
             this.panelPN.TabIndex = 8;
             this.panelPN.Visible = false;
             // 
+            // cbPNOctaveCount
+            // 
+            this.cbPNOctaveCount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbPNOctaveCount.FormattingEnabled = true;
+            this.cbPNOctaveCount.Items.AddRange(new object[] {
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "31"});
+            this.cbPNOctaveCount.Location = new System.Drawing.Point(94, 60);
+            this.cbPNOctaveCount.Name = "cbPNOctaveCount";
+            this.cbPNOctaveCount.Size = new System.Drawing.Size(72, 20);
+            this.cbPNOctaveCount.TabIndex = 8;
+            // 
             // lbPNOctaveCount
             // 
             this.lbPNOctaveCount.AutoSize = true;
@@ -229,12 +342,11 @@
             this.tbPNWidth.Size = new System.Drawing.Size(72, 21);
             this.tbPNWidth.TabIndex = 2;
             // 
-            // cbPNOctaveCount
+            // cbBSPDepthCount
             // 
-            this.cbPNOctaveCount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbPNOctaveCount.FormattingEnabled = true;
-            this.cbPNOctaveCount.Items.AddRange(new object[] {
-            "0",
+            this.cbBSPDepthCount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbBSPDepthCount.FormattingEnabled = true;
+            this.cbBSPDepthCount.Items.AddRange(new object[] {
             "1",
             "2",
             "3",
@@ -244,102 +356,54 @@
             "7",
             "8",
             "9",
-            "10",
-            "11",
-            "12",
-            "13",
-            "14",
-            "15",
-            "16",
-            "17",
-            "18",
-            "19",
-            "20",
-            "21",
-            "22",
-            "23",
-            "24",
-            "25",
-            "26",
-            "27",
-            "28",
-            "29",
-            "30",
-            "31"});
-            this.cbPNOctaveCount.Location = new System.Drawing.Point(94, 60);
-            this.cbPNOctaveCount.Name = "cbPNOctaveCount";
-            this.cbPNOctaveCount.Size = new System.Drawing.Size(72, 20);
-            this.cbPNOctaveCount.TabIndex = 8;
+            "10"});
+            this.cbBSPDepthCount.Location = new System.Drawing.Point(94, 60);
+            this.cbBSPDepthCount.Name = "cbBSPDepthCount";
+            this.cbBSPDepthCount.Size = new System.Drawing.Size(72, 20);
+            this.cbBSPDepthCount.TabIndex = 14;
             // 
-            // cbCARunCount
+            // label1
             // 
-            this.cbCARunCount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbCARunCount.FormattingEnabled = true;
-            this.cbCARunCount.Items.AddRange(new object[] {
-            "0",
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "11",
-            "12",
-            "13",
-            "14",
-            "15",
-            "16",
-            "17",
-            "18",
-            "19",
-            "20",
-            "21",
-            "22",
-            "23",
-            "24",
-            "25",
-            "26",
-            "27",
-            "28",
-            "29",
-            "30",
-            "31",
-            "32",
-            "33",
-            "34",
-            "35",
-            "36",
-            "37",
-            "38",
-            "39",
-            "40",
-            "41",
-            "42",
-            "43",
-            "44",
-            "45",
-            "46",
-            "47",
-            "48",
-            "49",
-            "50"});
-            this.cbCARunCount.Location = new System.Drawing.Point(94, 87);
-            this.cbCARunCount.Name = "cbCARunCount";
-            this.cbCARunCount.Size = new System.Drawing.Size(72, 20);
-            this.cbCARunCount.TabIndex = 9;
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(9, 63);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(74, 12);
+            this.label1.TabIndex = 13;
+            this.label1.Text = "Depth Count";
             // 
-            // button1
+            // label2
             // 
-            this.button1.Location = new System.Drawing.Point(3, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(330, 244);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Comming soon";
-            this.button1.UseVisualStyleBackColor = true;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 36);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(77, 12);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "Room Height";
+            // 
+            // tbBSPHeight
+            // 
+            this.tbBSPHeight.Location = new System.Drawing.Point(94, 33);
+            this.tbBSPHeight.MaxLength = 4;
+            this.tbBSPHeight.Name = "tbBSPHeight";
+            this.tbBSPHeight.Size = new System.Drawing.Size(72, 21);
+            this.tbBSPHeight.TabIndex = 11;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(11, 12);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(72, 12);
+            this.label3.TabIndex = 10;
+            this.label3.Text = "Room Width";
+            // 
+            // tbBSPWidth
+            // 
+            this.tbBSPWidth.Location = new System.Drawing.Point(94, 6);
+            this.tbBSPWidth.MaxLength = 4;
+            this.tbBSPWidth.Name = "tbBSPWidth";
+            this.tbBSPWidth.Size = new System.Drawing.Size(72, 21);
+            this.tbBSPWidth.TabIndex = 9;
             // 
             // MainForm
             // 
@@ -360,6 +424,7 @@
             this.Text = "PGTools";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.panelBSP.ResumeLayout(false);
+            this.panelBSP.PerformLayout();
             this.panelCA.ResumeLayout(false);
             this.panelCA.PerformLayout();
             this.panelPN.ResumeLayout(false);
@@ -390,7 +455,12 @@
         private System.Windows.Forms.Label lbPNOctaveCount;
         private System.Windows.Forms.ComboBox cbPNOctaveCount;
         private System.Windows.Forms.ComboBox cbCARunCount;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ComboBox cbBSPDepthCount;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox tbBSPHeight;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox tbBSPWidth;
     }
 }
 

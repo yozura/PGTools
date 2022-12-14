@@ -5,9 +5,7 @@ VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PGToolsApp", "PGToolsApp\PGToolsApp.csproj", "{6609426E-2DB9-4220-8EF3-0E53F091DEAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PGToolsWorkspace", "PGToolsWorkspace\PGToolsWorkspace.csproj", "{A78A758E-8932-418F-A745-358D5C1EB15D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PGToolsTestSpace", "PGToolsTestSpace\PGToolsTestSpace.csproj", "{B99C26C3-6B75-4BE8-A2BD-3A33F59741D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PGToolsTestSpace", "PGToolsTestSpace\PGToolsTestSpace.csproj", "{B99C26C3-6B75-4BE8-A2BD-3A33F59741D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +17,6 @@ Global
 		{6609426E-2DB9-4220-8EF3-0E53F091DEAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6609426E-2DB9-4220-8EF3-0E53F091DEAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6609426E-2DB9-4220-8EF3-0E53F091DEAA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A78A758E-8932-418F-A745-358D5C1EB15D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A78A758E-8932-418F-A745-358D5C1EB15D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A78A758E-8932-418F-A745-358D5C1EB15D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A78A758E-8932-418F-A745-358D5C1EB15D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B99C26C3-6B75-4BE8-A2BD-3A33F59741D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B99C26C3-6B75-4BE8-A2BD-3A33F59741D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B99C26C3-6B75-4BE8-A2BD-3A33F59741D0}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -17,9 +17,10 @@ namespace PGToolsApp
         public static int PixelWidth { get; set; }
         public static int PixelHeight { get; set; }
 
-        // 세포 자동자 전용 구조체
-        public TagCA TCA { get; set; }
-        public TagPN TPN { get; set; }
+        // 알고리즘 전용 구조체
+        public TagBSP   TBSP    { get; set; }
+        public TagCA    TCA     { get; set; }
+        public TagPN    TPN     { get; set; }
 
         public PG_ALGORITHM CurrentAlgorithm { get; set; }
         
@@ -29,7 +30,8 @@ namespace PGToolsApp
             bitmapWidth = bitmapHeight = 256;
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                // 미완성
+                bitmapWidth = TBSP.RoomWidth * PixelWidth;
+                bitmapHeight = TBSP.RoomHeight * PixelHeight;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
@@ -56,7 +58,22 @@ namespace PGToolsApp
 
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                // 미완성
+                for (int y = 0; y < TBSP.RoomHeight; ++y)
+                {
+                    for (int x = 0; x < TBSP.RoomWidth; ++x)
+                    {
+                        switch (BitmapBoard[y, x])
+                        {
+                            case (int)BSP_TILE_TYPE.EMPTY:
+                                graphics.FillRectangle(Brushes.Black, x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
+                                break;
+                            case (int)BSP_TILE_TYPE.WALL:
+                            case (int)BSP_TILE_TYPE.CORRIDOR:
+                                graphics.DrawRectangle(Pens.White, x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
+                                break;
+                        }
+                    }
+                }
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
@@ -92,7 +109,7 @@ namespace PGToolsApp
         {
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-
+                SaveBSP();
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
@@ -106,37 +123,28 @@ namespace PGToolsApp
 
         private void btnRedraw_Click(object sender, System.EventArgs e)
         {
-            if (CurrentAlgorithm == PG_ALGORITHM.BSP)
-            {
-                // 미완성
-            }
-            else if (CurrentAlgorithm == PG_ALGORITHM.CA)
-            {
-                btnSave.Enabled = false;
-                btnRedraw.Enabled = false;
+            btnSave.Enabled = false;
+            btnRedraw.Enabled = false;
 
-                RedrawCA();
-                Refresh();
+            if (CurrentAlgorithm == PG_ALGORITHM.BSP)       RedrawBSP();
+            else if (CurrentAlgorithm == PG_ALGORITHM.CA)   RedrawCA();
+            else if (CurrentAlgorithm == PG_ALGORITHM.PN)   RedrawPN();
 
-                btnSave.Enabled = true;
-                btnRedraw.Enabled = true;
-            }
-            else if (CurrentAlgorithm == PG_ALGORITHM.PN)
-            {
-                btnSave.Enabled = false;
-                btnRedraw.Enabled = false;
-
-                RedrawPN();
-                Refresh();
-
-                btnSave.Enabled = true;
-                btnRedraw.Enabled = true;
-            }
+            Refresh();
+            btnSave.Enabled = true;
+            btnRedraw.Enabled = true;
         }
 
         private void btnExit_Click(object sender, System.EventArgs e)
         {
             Close();
+        }
+
+        private void RedrawBSP()
+        {
+            BSP bsp = new BSP(TBSP);
+            bsp.GenerateRoom();
+            BitmapBoard = bsp.Room;
         }
 
         private void RedrawCA()
@@ -157,6 +165,59 @@ namespace PGToolsApp
                     int alpha = Math.Abs((int)(TPN.Room[y][x] * 255));
                     BitmapBoard[y, x] = alpha;
                 }
+            }
+        }
+
+        private void SaveBSP()
+        {
+            // txt 파일로 저장 -> Wall은 1, Empty는 0
+            // png 파일로 저장 가능
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.InitialDirectory = "C:\\";
+            sfd.Filter = "txt files (*.txt)|*.txt|png files (*.png)|*.png|All Files (*.*)|*.*";
+            sfd.FilterIndex = 1;
+            sfd.RestoreDirectory = true;
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                string path = sfd.FileName;
+                string extension = Path.GetExtension(path);
+                if (extension == ".txt")
+                {
+                    using (StreamWriter sw = new StreamWriter(path))
+                    {
+                        sw.Write(TBSP.RoomHeight);
+                        sw.WriteLine();
+                        sw.Write(TBSP.RoomWidth);
+                        sw.WriteLine();
+                        for (int y = 0; y < TBSP.RoomHeight; ++y)
+                        {
+                            for (int x = 0; x < TBSP.RoomWidth; ++x)
+                            {
+                                sw.Write(BitmapBoard[y, x]);
+                            }
+                            sw.WriteLine();
+                        }
+                    }
+                }
+                else
+                {
+                    using (Bitmap bitmap = new Bitmap(pbBitmap.Width, pbBitmap.Height))
+                    {
+                        pbBitmap.DrawToBitmap(bitmap, pbBitmap.ClientRectangle);
+                        ImageFormat format = null;
+                        switch (extension)
+                        {
+                            case ".bmp": format = ImageFormat.Bmp; break;
+                            case ".png": format = ImageFormat.Png; break;
+                            case ".jpeg":
+                            case ".jpg": format = ImageFormat.Jpeg; break;
+                            case ".gif": format = ImageFormat.Gif; break;
+                        }
+                        bitmap.Save(path, format);
+                    }
+                }
+                MessageBox.Show($"{path} 파일 저장에 성공했습니다.");
             }
         }
 
@@ -209,7 +270,6 @@ namespace PGToolsApp
                         bitmap.Save(path, format);
                     }
                 }
-
                 MessageBox.Show($"{path} 파일 저장에 성공했습니다.");
             }
         }

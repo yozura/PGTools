@@ -28,15 +28,21 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.cbAlgo = new System.Windows.Forms.ComboBox();
             this.btnGen = new System.Windows.Forms.Button();
             this.btnOpt = new System.Windows.Forms.Button();
             this.panelBSP = new System.Windows.Forms.Panel();
+            this.cbBSPDepthCount = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.tbBSPHeight = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.tbBSPWidth = new System.Windows.Forms.TextBox();
             this.panelCA = new System.Windows.Forms.Panel();
             this.cbCARunCount = new System.Windows.Forms.ComboBox();
             this.lbCARunCount = new System.Windows.Forms.Label();
-            this.lbCAWallRatio = new System.Windows.Forms.Label();
             this.tbCAWallRatio = new System.Windows.Forms.TextBox();
             this.lbCAHeight = new System.Windows.Forms.Label();
             this.tbCAHeight = new System.Windows.Forms.TextBox();
@@ -49,12 +55,8 @@
             this.tbPNHeight = new System.Windows.Forms.TextBox();
             this.lbPNWidth = new System.Windows.Forms.Label();
             this.tbPNWidth = new System.Windows.Forms.TextBox();
-            this.cbBSPDepthCount = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.tbBSPHeight = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.tbBSPWidth = new System.Windows.Forms.TextBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.lbCAWallRatio = new System.Windows.Forms.Label();
             this.panelBSP.SuspendLayout();
             this.panelCA.SuspendLayout();
             this.panelPN.SuspendLayout();
@@ -104,6 +106,92 @@
             this.panelBSP.Size = new System.Drawing.Size(338, 252);
             this.panelBSP.TabIndex = 6;
             // 
+            // cbBSPDepthCount
+            // 
+            this.cbBSPDepthCount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbBSPDepthCount.FormattingEnabled = true;
+            this.cbBSPDepthCount.Items.AddRange(new object[] {
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30"});
+            this.cbBSPDepthCount.Location = new System.Drawing.Point(94, 60);
+            this.cbBSPDepthCount.Name = "cbBSPDepthCount";
+            this.cbBSPDepthCount.Size = new System.Drawing.Size(72, 20);
+            this.cbBSPDepthCount.TabIndex = 14;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(9, 63);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(74, 12);
+            this.label1.TabIndex = 13;
+            this.label1.Text = "Depth Count";
+            this.toolTip1.SetToolTip(this.label1, "Determines recursion depth of bsp algorithm.");
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 36);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(77, 12);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "Room Height";
+            this.toolTip1.SetToolTip(this.label2, "Determines the height of image being drawn in the window. i recommend 50 ~ 2^9");
+            // 
+            // tbBSPHeight
+            // 
+            this.tbBSPHeight.Location = new System.Drawing.Point(94, 33);
+            this.tbBSPHeight.MaxLength = 4;
+            this.tbBSPHeight.Name = "tbBSPHeight";
+            this.tbBSPHeight.Size = new System.Drawing.Size(72, 21);
+            this.tbBSPHeight.TabIndex = 11;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(11, 12);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(72, 12);
+            this.label3.TabIndex = 10;
+            this.label3.Text = "Room Width";
+            this.toolTip1.SetToolTip(this.label3, "Determines the width of image being drawn in the window. i recommend 50 ~ 2^9");
+            // 
+            // tbBSPWidth
+            // 
+            this.tbBSPWidth.Location = new System.Drawing.Point(94, 6);
+            this.tbBSPWidth.MaxLength = 4;
+            this.tbBSPWidth.Name = "tbBSPWidth";
+            this.tbBSPWidth.Size = new System.Drawing.Size(72, 21);
+            this.tbBSPWidth.TabIndex = 9;
+            // 
             // panelCA
             // 
             this.panelCA.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -126,7 +214,6 @@
             this.cbCARunCount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbCARunCount.FormattingEnabled = true;
             this.cbCARunCount.Items.AddRange(new object[] {
-            "0",
             "1",
             "2",
             "3",
@@ -190,15 +277,7 @@
             this.lbCARunCount.Size = new System.Drawing.Size(64, 12);
             this.lbCARunCount.TabIndex = 11;
             this.lbCARunCount.Text = "Run Count";
-            // 
-            // lbCAWallRatio
-            // 
-            this.lbCAWallRatio.AutoSize = true;
-            this.lbCAWallRatio.Location = new System.Drawing.Point(23, 63);
-            this.lbCAWallRatio.Name = "lbCAWallRatio";
-            this.lbCAWallRatio.Size = new System.Drawing.Size(60, 12);
-            this.lbCAWallRatio.TabIndex = 9;
-            this.lbCAWallRatio.Text = "Wall Ratio";
+            this.toolTip1.SetToolTip(this.lbCARunCount, "Determines the number of times an algorithm runs repeatedly. i recommend 5 ~ 10");
             // 
             // tbCAWallRatio
             // 
@@ -216,6 +295,7 @@
             this.lbCAHeight.Size = new System.Drawing.Size(77, 12);
             this.lbCAHeight.TabIndex = 7;
             this.lbCAHeight.Text = "Room Height";
+            this.toolTip1.SetToolTip(this.lbCAHeight, "Determines the height of image being drawn in the window. i recommend 50 ~ 2^9\r\n");
             // 
             // tbCAHeight
             // 
@@ -233,6 +313,7 @@
             this.lbCAWidth.Size = new System.Drawing.Size(72, 12);
             this.lbCAWidth.TabIndex = 5;
             this.lbCAWidth.Text = "Room Width";
+            this.toolTip1.SetToolTip(this.lbCAWidth, "Determines the width of image being drawn in the window. i recommend 50 ~ 2^9\r\n");
             // 
             // tbCAWidth
             // 
@@ -262,7 +343,6 @@
             this.cbPNOctaveCount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbPNOctaveCount.FormattingEnabled = true;
             this.cbPNOctaveCount.Items.AddRange(new object[] {
-            "0",
             "1",
             "2",
             "3",
@@ -307,6 +387,7 @@
             this.lbPNOctaveCount.Size = new System.Drawing.Size(81, 12);
             this.lbPNOctaveCount.TabIndex = 7;
             this.lbPNOctaveCount.Text = "Octave Count";
+            this.toolTip1.SetToolTip(this.lbPNOctaveCount, "Generates and sums up noise at frequencies as diverse as this value.");
             // 
             // lbPNHeight
             // 
@@ -316,6 +397,7 @@
             this.lbPNHeight.Size = new System.Drawing.Size(77, 12);
             this.lbPNHeight.TabIndex = 5;
             this.lbPNHeight.Text = "Room Height";
+            this.toolTip1.SetToolTip(this.lbPNHeight, "Determines the height of image being drawn in the window. i recommend 50 ~ 2^9");
             // 
             // tbPNHeight
             // 
@@ -333,6 +415,7 @@
             this.lbPNWidth.Size = new System.Drawing.Size(72, 12);
             this.lbPNWidth.TabIndex = 3;
             this.lbPNWidth.Text = "Room Width";
+            this.toolTip1.SetToolTip(this.lbPNWidth, "Determines the width of image being drawn in the window. i recommend 50 ~ 2^9");
             // 
             // tbPNWidth
             // 
@@ -342,68 +425,16 @@
             this.tbPNWidth.Size = new System.Drawing.Size(72, 21);
             this.tbPNWidth.TabIndex = 2;
             // 
-            // cbBSPDepthCount
+            // lbCAWallRatio
             // 
-            this.cbBSPDepthCount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbBSPDepthCount.FormattingEnabled = true;
-            this.cbBSPDepthCount.Items.AddRange(new object[] {
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10"});
-            this.cbBSPDepthCount.Location = new System.Drawing.Point(94, 60);
-            this.cbBSPDepthCount.Name = "cbBSPDepthCount";
-            this.cbBSPDepthCount.Size = new System.Drawing.Size(72, 20);
-            this.cbBSPDepthCount.TabIndex = 14;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 63);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(74, 12);
-            this.label1.TabIndex = 13;
-            this.label1.Text = "Depth Count";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 36);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 12);
-            this.label2.TabIndex = 12;
-            this.label2.Text = "Room Height";
-            // 
-            // tbBSPHeight
-            // 
-            this.tbBSPHeight.Location = new System.Drawing.Point(94, 33);
-            this.tbBSPHeight.MaxLength = 4;
-            this.tbBSPHeight.Name = "tbBSPHeight";
-            this.tbBSPHeight.Size = new System.Drawing.Size(72, 21);
-            this.tbBSPHeight.TabIndex = 11;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(11, 12);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(72, 12);
-            this.label3.TabIndex = 10;
-            this.label3.Text = "Room Width";
-            // 
-            // tbBSPWidth
-            // 
-            this.tbBSPWidth.Location = new System.Drawing.Point(94, 6);
-            this.tbBSPWidth.MaxLength = 4;
-            this.tbBSPWidth.Name = "tbBSPWidth";
-            this.tbBSPWidth.Size = new System.Drawing.Size(72, 21);
-            this.tbBSPWidth.TabIndex = 9;
+            this.lbCAWallRatio.AutoSize = true;
+            this.lbCAWallRatio.Location = new System.Drawing.Point(23, 63);
+            this.lbCAWallRatio.Name = "lbCAWallRatio";
+            this.lbCAWallRatio.Size = new System.Drawing.Size(60, 12);
+            this.lbCAWallRatio.TabIndex = 9;
+            this.lbCAWallRatio.Text = "Wall Ratio";
+            this.toolTip1.SetToolTip(this.lbCAWallRatio, "Determines the rate at which walls will be created in pseudorandom numbers. i rec" +
+        "ommend 0.4 ~ 0.5");
             // 
             // MainForm
             // 
@@ -447,7 +478,6 @@
         private System.Windows.Forms.TextBox tbCAWidth;
         private System.Windows.Forms.Label lbCAHeight;
         private System.Windows.Forms.TextBox tbCAHeight;
-        private System.Windows.Forms.Label lbCAWallRatio;
         private System.Windows.Forms.TextBox tbCAWallRatio;
         private System.Windows.Forms.Label lbCARunCount;
         private System.Windows.Forms.Label lbPNHeight;
@@ -461,6 +491,8 @@
         private System.Windows.Forms.TextBox tbBSPHeight;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox tbBSPWidth;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Label lbCAWallRatio;
     }
 }
 

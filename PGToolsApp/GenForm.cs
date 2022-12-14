@@ -11,6 +11,7 @@ namespace PGToolsApp
         public GenForm()
         {
             InitializeComponent();
+            pbBitmap.Paint += pbBitmap_Paint;
         }
 
         public int[,] BitmapBoard { get; set; }

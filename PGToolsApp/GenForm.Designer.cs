@@ -87,7 +87,6 @@
             this.pbBitmap.Size = new System.Drawing.Size(389, 448);
             this.pbBitmap.TabIndex = 5;
             this.pbBitmap.TabStop = false;
-            this.pbBitmap.Paint += pbBitmap_Paint;
             // 
             // GenForm
             // 
@@ -96,7 +95,7 @@
             this.ClientSize = new System.Drawing.Size(528, 448);
             this.Controls.Add(this.pbBitmap);
             this.Controls.Add(this.panelBtns);
-            this.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.Cursor = System.Windows.Forms.Cursors.Default;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;

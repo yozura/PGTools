@@ -66,7 +66,7 @@ namespace PGToolsApp
             int yLen = y2 - y1; // 높이
 
             // 재귀의 깊이가 도달한 경우, 방의 크기가 10x10보다 작을 경우
-            if (depth == 0 || (xLen <= 10 || yLen <= 10))
+            if (depth == 0 || (xLen <= 15 || yLen <= 15))
             {
                 for (int y = y1 + 2; y < y2 - 2; ++y)
                 {

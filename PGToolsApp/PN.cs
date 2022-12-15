@@ -42,6 +42,7 @@ namespace PGToolsApp
                 smoothNoise[i] = new float[width];
 
             // 2의 octave 곱을 저장, int형이기 때문에 32제곱을 넘을 수 없음.
+            // 즉 옥타브의 값마다 다양한 주파수의 샘플이 만들어짐.
             int samplePeriod = 1 << octave;
             float sampleFrequency = 1.0f / samplePeriod;
 
@@ -108,7 +109,7 @@ namespace PGToolsApp
                 }
             }
 
-            // 전체 진폭으로 펄린 노이즈를 정규화시킵니다.
+            // 전체 진폭으로 펄린 노이즈를 정규화시켜 최종 결과물을 도출합니다.
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)

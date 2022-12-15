@@ -76,26 +76,21 @@ namespace PGToolsApp
             {
                 case (int)PG_ALGORITHM.BSP: 
                     {
-                        int roomWidth, roomHeight, depth;
-                        if (!int.TryParse(tbBSPWidth.Text, out roomWidth))
+                        int roomSize, depth;
+                        if (!int.TryParse(tbBSPSize.Text, out roomSize))
                         {
-                            MessageBox.Show("너비 입력이 잘못되었습니다. 숫자를 입력해주세요.");
-                            break;
-                        }
-                        if (!int.TryParse(tbBSPHeight.Text, out roomHeight))
-                        {
-                            MessageBox.Show("높이 입력이 잘못되었습니다. 숫자를 입력해주세요.");
+                            MessageBox.Show("크기 입력이 잘못되었습니다. 숫자를 입력해주세요.");
                             break;
                         }
                         if (!int.TryParse(cbBSPDepthCount.Text, out depth))
                         {
-                            MessageBox.Show("옥타브 입력이 잘못되었습니다. 숫자를 입력해주세요.");
+                            MessageBox.Show("깊이 입력이 잘못되었습니다. 숫자를 입력해주세요.");
                             break;
                         }
 
                         TagBSP tbsp = new TagBSP();
-                        tbsp.RoomWidth = roomWidth;
-                        tbsp.RoomHeight = roomHeight;
+                        tbsp.RoomWidth = roomSize;
+                        tbsp.RoomHeight = roomSize;
                         tbsp.Depth = depth;
                         RunBSP(tbsp);
                     }

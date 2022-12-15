@@ -17,6 +17,6 @@ Create resource auto generation tool using Procedural Generate Algorithm in C#
 > BSP Tuto : http://www.roguebasin.com/index.php?title=Basic_BSP_Dungeon_generation  
 > BSP Wiki : https://en.wikipedia.org/wiki/Binary_space_partitioning  
   
-> 절차적 생성 알고리즘 튜토리얼(기본) : https://gamedevelopment.tutsplus.com/ko/tutorials/create-a-  procedurally-generated-dungeon-cave-system--gamedev-10099  
+> 절차적 생성 알고리즘 튜토리얼(기본) : https://gamedevelopment.tutsplus.com/ko/tutorials/create-a-procedurally-generated-dungeon-cave-system--gamedev-10099  
   
 > 절차적 맵 생성, 게임코디 : http://1st.gamecodi.com/board/zboard.php?id=GAMECODI_Talkdev&no=3763  

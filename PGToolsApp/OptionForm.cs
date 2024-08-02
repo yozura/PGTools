@@ -1,12 +1,20 @@
-﻿using System.Windows.Forms;
+﻿using System.Drawing;
+using System;
+using System.Windows.Forms;
 
 namespace PGToolsApp
 {
     public partial class OptionForm : Form
     {
-        public OptionForm()
+        private Form parent;
+
+        public OptionForm(Form parent)
         {
             InitializeComponent();
+            
+            Shown += OptionForm_Shown;
+
+            this.parent = parent;
         }
 
         private void OptionForm_Load(object sender, System.EventArgs e)
@@ -23,6 +31,16 @@ namespace PGToolsApp
                 case 1: rbPixelWidth1.Checked = true; break;
                 case 5: rbPixelWidth2.Checked = true; break;
                 case 10: rbPixelWidth3.Checked = true; break;
+            }
+        }
+
+        private void OptionForm_Shown(object sender, EventArgs e)
+        {
+            if (parent != null)
+            {
+                this.Location = new Point(
+                    parent.Location.X + (parent.Width - this.Width) / 2,
+                    parent.Location.Y + (parent.Height - this.Height) / 2);
             }
         }
 

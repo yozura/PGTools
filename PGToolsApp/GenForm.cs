@@ -8,22 +8,29 @@ namespace PGToolsApp
 {
     public partial class GenForm : Form
     {
-        public GenForm()
-        {
-            InitializeComponent();
-            pbBitmap.Paint += pbBitmap_Paint;
-        }
+        private Form parent;
 
         public int[,] BitmapBoard { get; set; }
         public static int PixelWidth { get; set; }
         public static int PixelHeight { get; set; }
 
-        // 알고리즘 전용 구조체
-        public TagBSP   TBSP    { get; set; }
-        public TagCA    TCA     { get; set; }
-        public TagPN    TPN     { get; set; }
+        public TagBSP TBSP { get; set; }
+        public TagCA TCA { get; set; }
+        public TagPN TPN { get; set; }
 
         public PG_ALGORITHM CurrentAlgorithm { get; set; }
+
+        public GenForm(Form parent)
+        {
+            InitializeComponent();
+
+            // Set Delegate
+            Shown += GenForm_Shown;
+            pbBitmap.Paint += pbBitmap_Paint;
+
+            // Set Variable
+            this.parent = parent;
+        }
         
         private void GenForm_Load(object sender, System.EventArgs e)
         {
@@ -50,6 +57,16 @@ namespace PGToolsApp
 
             this.Size = new Size(bitmapWidth + panelBtns.Size.Width, bitmapHeight + diff);
             pbBitmap.Size = new Size(bitmapWidth, bitmapHeight);
+        }
+
+        private void GenForm_Shown(object sender, EventArgs e)
+        {
+            if (parent != null)
+            {
+                this.Location = new Point(
+                    parent.Location.X + (parent.Width - this.Width) / 2,
+                    parent.Location.Y + (parent.Height - this.Height) / 2);
+            }
         }
 
         private void pbBitmap_Paint(object sender, PaintEventArgs e)

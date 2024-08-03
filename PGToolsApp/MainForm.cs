@@ -20,8 +20,6 @@ namespace PGToolsApp
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            GenForm.PixelHeight = GenForm.PixelWidth = 5;
-
             this.Size = new Size(380, 420);
             dictAlgo = new Dictionary<int, string>
             {

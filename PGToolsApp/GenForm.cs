@@ -51,11 +51,7 @@ namespace PGToolsApp
                 bitmapHeight = TPN.RoomHeight;
             }
 
-            this.Size = new Size(bitmapWidth + panelBtns.Size.Width, bitmapHeight);
-            int diff = bitmapHeight - ClientSize.Height;
-
-            this.Size = new Size(bitmapWidth + panelBtns.Size.Width, bitmapHeight + diff);
-            pbBitmap.Size = new Size(bitmapWidth, bitmapHeight);
+            this.ClientSize = new Size(bitmapWidth + panelBtns.Width, bitmapHeight);
         }
 
         private void GenForm_Shown(object sender, EventArgs e)
@@ -142,12 +138,10 @@ namespace PGToolsApp
         {
             btnSave.Enabled = false;
             btnRedraw.Enabled = false;
-
-            if (CurrentAlgorithm == PG_ALGORITHM.BSP)       RedrawBSP();
-            else if (CurrentAlgorithm == PG_ALGORITHM.CA)   RedrawCA();
-            else if (CurrentAlgorithm == PG_ALGORITHM.PN)   RedrawPN();
-
+            
+            Redraw();
             Refresh();
+            
             btnSave.Enabled = true;
             btnRedraw.Enabled = true;
         }
@@ -155,6 +149,13 @@ namespace PGToolsApp
         private void btnExit_Click(object sender, System.EventArgs e)
         {
             Close();
+        }
+
+        private void Redraw()
+        {
+            if (CurrentAlgorithm == PG_ALGORITHM.BSP) RedrawBSP();
+            else if (CurrentAlgorithm == PG_ALGORITHM.CA) RedrawCA();
+            else if (CurrentAlgorithm == PG_ALGORITHM.PN) RedrawPN();
         }
 
         private void RedrawBSP()

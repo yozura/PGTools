@@ -83,6 +83,7 @@
             // 
             this.pbBitmap.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbBitmap.Location = new System.Drawing.Point(0, 0);
+            this.pbBitmap.Margin = new System.Windows.Forms.Padding(0);
             this.pbBitmap.Name = "pbBitmap";
             this.pbBitmap.Size = new System.Drawing.Size(389, 448);
             this.pbBitmap.TabIndex = 5;
@@ -90,8 +91,8 @@
             // 
             // GenForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(528, 448);
             this.Controls.Add(this.pbBitmap);
             this.Controls.Add(this.panelBtns);

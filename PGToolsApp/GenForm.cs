@@ -8,48 +8,60 @@ namespace PGToolsApp
 {
     public partial class GenForm : Form
     {
-        public GenForm()
-        {
-            InitializeComponent();
-            pbBitmap.Paint += pbBitmap_Paint;
-        }
+        private Form parent;
 
         public int[,] BitmapBoard { get; set; }
-        public static int PixelWidth { get; set; }
-        public static int PixelHeight { get; set; }
 
-        // 알고리즘 전용 구조체
-        public TagBSP   TBSP    { get; set; }
-        public TagCA    TCA     { get; set; }
-        public TagPN    TPN     { get; set; }
+        public TagBSP TBSP { get; set; }
+        public TagCA TCA { get; set; }
+        public TagPN TPN { get; set; }
 
         public PG_ALGORITHM CurrentAlgorithm { get; set; }
+
+        public GenForm(Form parent)
+        {
+            InitializeComponent();
+
+            // Set Delegate
+            Shown += GenForm_Shown;
+            pbBitmap.Paint += pbBitmap_Paint;
+
+            // Set Variable
+            this.parent = parent;
+        }
         
         private void GenForm_Load(object sender, System.EventArgs e)
         {
             int bitmapWidth, bitmapHeight;
             bitmapWidth = bitmapHeight = 256;
+
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                bitmapWidth = TBSP.RoomWidth * PixelWidth;
-                bitmapHeight = TBSP.RoomHeight * PixelHeight;
+                bitmapWidth = TBSP.RoomWidth;
+                bitmapHeight = TBSP.RoomHeight;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
-                bitmapWidth = TCA.RoomWidth * PixelWidth;
-                bitmapHeight = TCA.RoomHeight * PixelHeight;
+                bitmapWidth = TCA.RoomWidth;
+                bitmapHeight = TCA.RoomHeight;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                bitmapWidth = TPN.RoomWidth * PixelWidth;
-                bitmapHeight = TPN.RoomHeight * PixelHeight;
+                bitmapWidth = TPN.RoomWidth;
+                bitmapHeight = TPN.RoomHeight;
             }
 
-            this.Size = new Size(bitmapWidth + panelBtns.Size.Width, bitmapHeight);
-            int diff = bitmapHeight - ClientSize.Height;
+            this.ClientSize = new Size(bitmapWidth + panelBtns.Width, bitmapHeight);
+        }
 
-            this.Size = new Size(bitmapWidth + panelBtns.Size.Width, bitmapHeight + diff);
-            pbBitmap.Size = new Size(bitmapWidth, bitmapHeight);
+        private void GenForm_Shown(object sender, EventArgs e)
+        {
+            if (parent != null)
+            {
+                this.Location = new Point(
+                    parent.Location.X + (parent.Width - this.Width) / 2,
+                    parent.Location.Y + (parent.Height - this.Height) / 2);
+            }
         }
 
         private void pbBitmap_Paint(object sender, PaintEventArgs e)
@@ -66,11 +78,11 @@ namespace PGToolsApp
                         switch (BitmapBoard[y, x])
                         {
                             case (int)BSP_TILE_TYPE.EMPTY:
-                                graphics.FillRectangle(Brushes.Black, x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
+                                graphics.FillRectangle(Brushes.Black, x, y, 1, 1);
                                 break;
                             case (int)BSP_TILE_TYPE.WALL:
                             case (int)BSP_TILE_TYPE.CORRIDOR:
-                                graphics.DrawRectangle(Pens.White, x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
+                                graphics.DrawRectangle(Pens.White, x, y, 1, 1);
                                 break;
                         }
                     }
@@ -85,10 +97,10 @@ namespace PGToolsApp
                         switch (BitmapBoard[y, x])
                         {
                             case (int)CA_TILE_TYPE.EMPTY:
-                                graphics.DrawRectangle(Pens.White, x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
+                                graphics.DrawRectangle(Pens.White, x, y, 1, 1);
                                 break;
                             case (int)CA_TILE_TYPE.WALL:
-                                graphics.FillRectangle(Brushes.Black, x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
+                                graphics.FillRectangle(Brushes.Black, x, y, 1, 1);
                                 break;
                         }
                     }
@@ -100,7 +112,7 @@ namespace PGToolsApp
                 {
                     for (int x = 0; x < TPN.RoomWidth; ++x)
                     {
-                        graphics.FillRectangle(new SolidBrush(Color.FromArgb(BitmapBoard[y, x], Color.Black)), x * PixelWidth, y * PixelHeight, PixelWidth, PixelHeight);
+                        graphics.FillRectangle(new SolidBrush(Color.FromArgb(BitmapBoard[y, x], Color.Black)), x, y, 1, 1);
                     }
                 }
             }
@@ -126,12 +138,10 @@ namespace PGToolsApp
         {
             btnSave.Enabled = false;
             btnRedraw.Enabled = false;
-
-            if (CurrentAlgorithm == PG_ALGORITHM.BSP)       RedrawBSP();
-            else if (CurrentAlgorithm == PG_ALGORITHM.CA)   RedrawCA();
-            else if (CurrentAlgorithm == PG_ALGORITHM.PN)   RedrawPN();
-
+            
+            Redraw();
             Refresh();
+            
             btnSave.Enabled = true;
             btnRedraw.Enabled = true;
         }
@@ -139,6 +149,13 @@ namespace PGToolsApp
         private void btnExit_Click(object sender, System.EventArgs e)
         {
             Close();
+        }
+
+        private void Redraw()
+        {
+            if (CurrentAlgorithm == PG_ALGORITHM.BSP) RedrawBSP();
+            else if (CurrentAlgorithm == PG_ALGORITHM.CA) RedrawCA();
+            else if (CurrentAlgorithm == PG_ALGORITHM.PN) RedrawPN();
         }
 
         private void RedrawBSP()

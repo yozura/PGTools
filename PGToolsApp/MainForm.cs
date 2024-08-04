@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace PGToolsApp
@@ -11,16 +12,15 @@ namespace PGToolsApp
         public MainForm()
         {
             InitializeComponent();
+            this.Shown += MainForm_Shown;
         }
 
         Dictionary<int, string> dictAlgo;
         List<Panel> listAlgoPanel;
 
-        private void MainForm_Load(object sender, System.EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
-            GenForm.PixelHeight = GenForm.PixelWidth = 5;
-
-            this.Size = new System.Drawing.Size(380, 420);
+            this.Size = new Size(380, 420);
             dictAlgo = new Dictionary<int, string>
             {
                 { 0, "BSP" },
@@ -40,7 +40,14 @@ namespace PGToolsApp
             cbAlgo.SelectedIndex = 0;
         }
 
-        private void cbAlgo_SelectedIndexChanged(object sender, System.EventArgs e)
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            this.Location = new Point(
+                (Screen.PrimaryScreen.WorkingArea.Width - this.Width) / 2,
+                (Screen.PrimaryScreen.WorkingArea.Height - this.Height) / 2);
+        }
+
+        private void cbAlgo_SelectedIndexChanged(object sender, EventArgs e)
         {
             string algo;
             if (dictAlgo.TryGetValue(cbAlgo.SelectedIndex, out algo))
@@ -50,7 +57,7 @@ namespace PGToolsApp
                 {
                     if (cbAlgo.Items[i].Equals(algo))
                     {
-                        listAlgoPanel[i].Location = new System.Drawing.Point(12, 38);
+                        listAlgoPanel[i].Location = new Point(12, 38);
                         listAlgoPanel[i].Visible = true;
                         break;
                     }
@@ -64,13 +71,13 @@ namespace PGToolsApp
             }
         }
 
-        private void btnOpt_Click(object sender, System.EventArgs e)
+        private void btnOpt_Click(object sender, EventArgs e)
         {
-            OptionForm optForm = new OptionForm();
-            optForm.Show();
+            OptionForm optForm = new OptionForm(this);
+            optForm.ShowDialog();
         }
 
-        private void btnGen_Click(object sender, System.EventArgs e)
+        private void btnGen_Click(object sender, EventArgs e)
         {
             switch (cbAlgo.SelectedIndex)
             {
@@ -163,8 +170,7 @@ namespace PGToolsApp
             BSP bsp = new BSP(tbsp.RoomWidth, tbsp.RoomHeight, tbsp.Depth);
             bsp.GenerateRoom();
 
-            // 새로운 폼에서 보여주기
-            GenForm genForm = new GenForm();
+            GenForm genForm = new GenForm(this);
             genForm.BitmapBoard = bsp.Room;
             genForm.TBSP = tbsp;
             genForm.CurrentAlgorithm = PG_ALGORITHM.BSP;
@@ -177,8 +183,7 @@ namespace PGToolsApp
             CA ca = new CA(tca);
             ca.Generate();
 
-            // 새로운 폼에서 보여주기
-            GenForm genForm = new GenForm();
+            GenForm genForm = new GenForm(this);
             genForm.BitmapBoard = ca.Room;
             genForm.TCA = tca;
             genForm.CurrentAlgorithm = PG_ALGORITHM.CA;
@@ -189,7 +194,7 @@ namespace PGToolsApp
         {
             TagPN tpn = (TagPN)obj;
             PN pn = new PN();
-            GenForm genForm = new GenForm();
+            GenForm genForm = new GenForm(this);
 
             genForm.BitmapBoard = new int[tpn.RoomHeight, tpn.RoomWidth];
             tpn.Room = pn.GeneratePerlinNoise(pn.GenerateWhiteNoise(tpn.RoomWidth, tpn.RoomHeight), tpn.OctaveCount);

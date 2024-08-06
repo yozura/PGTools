@@ -95,11 +95,7 @@ namespace PGToolsApp
                             break;
                         }
 
-                        TagBSP tbsp = new TagBSP();
-                        tbsp.RoomWidth = roomSize;
-                        tbsp.RoomHeight = roomSize;
-                        tbsp.Depth = depth;
-                        RunBSP(tbsp);
+                        ShowGenForm(roomSize, roomSize, depth);
                     }
                     break;
                 case (int)PG_ALGORITHM.CA:
@@ -164,17 +160,17 @@ namespace PGToolsApp
             }
         }
 
-        private void RunBSP(object obj)
+        private void ShowGenForm(int roomWidth, int roomHeight, int depth)
         {
-            TagBSP tbsp = (TagBSP)obj;
-            BSP bsp = new BSP(tbsp.RoomWidth, tbsp.RoomHeight, tbsp.Depth);
-            bsp.GenerateRoom();
+            BSPInformation info = new BSPInformation(roomWidth, roomHeight, depth);
+            BSP bsp = new BSP(info);
+            bsp.Generate();
 
-            GenForm genForm = new GenForm(this);
-            genForm.BitmapBoard = bsp.Room;
-            genForm.TBSP = tbsp;
-            genForm.CurrentAlgorithm = PG_ALGORITHM.BSP;
-            genForm.ShowDialog();
+            GenForm gf = new GenForm(this);
+            gf.CurrentAlgorithm = PG_ALGORITHM.BSP;
+            gf.BitmapBoard = bsp.Room;
+            gf.BSPInfo = info;
+            gf.ShowDialog();
         }
 
         private void RunCA(object obj)

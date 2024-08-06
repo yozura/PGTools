@@ -4,19 +4,23 @@ namespace PGToolsApp
 {
     public enum BSP_TILE_TYPE { EMPTY = 0, WALL, CORRIDOR }
 
-    public class TagBSP
+    public struct BSPInformation
     {
         public int RoomWidth { get; set; }
         public int RoomHeight { get; set; }
         public int Depth { get; set; }
-        public int[,] Room { get; set; }
+
+        public BSPInformation(int width, int height, int depth)
+        {
+            RoomWidth = width;
+            RoomHeight = height;   
+            Depth = depth;
+        }
     }
 
-    public class BSP
+    public class BSP : IProceduralGenerator
     {
-        public int RoomWidth { get; set; }
-        public int RoomHeight { get; set; }
-        public int Depth { get; set; }
+        public BSPInformation Info { get; set; }
         public int[,] Room { get; set; }
         public Random Rand { get; set; }
 
@@ -42,24 +46,25 @@ namespace PGToolsApp
 
         public BSP(int roomWidth, int roomHeight, int depth)
         {
-            RoomWidth = roomWidth;
-            RoomHeight = roomHeight;
-            Depth = depth;
+            Info = new BSPInformation(roomWidth, roomHeight, depth);
 
-            Room = new int[RoomHeight, RoomWidth];
+            Room = new int[Info.RoomWidth, Info.RoomHeight];
             Rand = new Random();
         }
 
-        public BSP(TagBSP tbsp)
+        public BSP(BSPInformation info)
         {
-            this.RoomWidth = tbsp.RoomWidth;
-            this.RoomHeight = tbsp.RoomHeight;
-            this.Depth = tbsp.Depth;
+            Info = info;
 
-            Room = new int[RoomHeight, RoomWidth];
+            Room = new int[Info.RoomHeight, Info.RoomWidth];
             Rand = new Random();
         }
 
+        public void Generate()
+        {
+            DivideRoom(Info.Depth, 0, 0, Info.RoomWidth, Info.RoomHeight);
+        }
+        
         RoomLocation DivideRoom(int depth, int x1, int y1, int x2, int y2)
         {
             int xLen = x2 - x1; // 너비
@@ -131,16 +136,11 @@ namespace PGToolsApp
                 );
         }
 
-        public void GenerateRoom()
-        {
-            DivideRoom(Depth, 0, 0, RoomWidth, RoomHeight);
-        }
-
         public void PrintRoom()
         {
-            for (int y = 0; y < RoomHeight; ++y)
+            for (int y = 0; y < Info.RoomHeight; ++y)
             {
-                for (int x = 0; x < RoomWidth; ++x)
+                for (int x = 0; x < Info.RoomWidth; ++x)
                 {
                     if (Room[y, x] != 0) Console.Write(Room[y, x]);
                     else Console.Write(" ");
@@ -148,5 +148,6 @@ namespace PGToolsApp
                 Console.WriteLine();
             }
         }
+
     }
 }

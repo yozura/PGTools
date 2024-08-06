@@ -73,6 +73,7 @@
     <Compile Include="GenForm.Designer.cs">
       <DependentUpon>GenForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="IProceduralGenerator.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

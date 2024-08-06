@@ -12,7 +12,7 @@ namespace PGToolsApp
 
         public int[,] BitmapBoard { get; set; }
 
-        public TagBSP TBSP { get; set; }
+        public BSPInformation BSPInfo { get; set; }
         public TagCA TCA { get; set; }
         public TagPN TPN { get; set; }
 
@@ -37,8 +37,9 @@ namespace PGToolsApp
 
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                bitmapWidth = TBSP.RoomWidth;
-                bitmapHeight = TBSP.RoomHeight;
+                bitmapWidth = BSPInfo.RoomWidth;
+                bitmapHeight = BSPInfo.RoomHeight;
+
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
@@ -71,9 +72,9 @@ namespace PGToolsApp
 
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                for (int y = 0; y < TBSP.RoomHeight; ++y)
+                for (int y = 0; y < BSPInfo.RoomHeight; ++y)
                 {
-                    for (int x = 0; x < TBSP.RoomWidth; ++x)
+                    for (int x = 0; x < BSPInfo.RoomWidth; ++x)
                     {
                         switch (BitmapBoard[y, x])
                         {
@@ -160,8 +161,8 @@ namespace PGToolsApp
 
         private void RedrawBSP()
         {
-            BSP bsp = new BSP(TBSP);
-            bsp.GenerateRoom();
+            BSP bsp = new BSP(BSPInfo);
+            bsp.Generate();
             BitmapBoard = bsp.Room;
         }
 
@@ -204,13 +205,13 @@ namespace PGToolsApp
                 {
                     using (StreamWriter sw = new StreamWriter(path))
                     {
-                        sw.Write(TBSP.RoomHeight);
+                        sw.Write(BSPInfo.RoomHeight);
                         sw.WriteLine();
-                        sw.Write(TBSP.RoomWidth);
+                        sw.Write(BSPInfo.RoomWidth);
                         sw.WriteLine();
-                        for (int y = 0; y < TBSP.RoomHeight; ++y)
+                        for (int y = 0; y < BSPInfo.RoomHeight; ++y)
                         {
-                            for (int x = 0; x < TBSP.RoomWidth; ++x)
+                            for (int x = 0; x < BSPInfo.RoomWidth; ++x)
                             {
                                 sw.Write(BitmapBoard[y, x]);
                             }

@@ -23,7 +23,7 @@ namespace PGToolsApp
             this.Size = new Size(380, 420);
             dictAlgo = new Dictionary<int, string>
             {
-                { 0, "BSP" },
+                { 0, "Binary Space Partitioning" },
                 { 1, "Cellular Automaton" },
                 { 2, "Perlin Noise" }
             };
@@ -95,17 +95,13 @@ namespace PGToolsApp
                             break;
                         }
 
-                        TagBSP tbsp = new TagBSP();
-                        tbsp.RoomWidth = roomSize;
-                        tbsp.RoomHeight = roomSize;
-                        tbsp.Depth = depth;
-                        RunBSP(tbsp);
+                        ShowGenFormBSP(roomSize, depth);
                     }
                     break;
                 case (int)PG_ALGORITHM.CA:
                     {
                         int roomWidth, roomHeight, runCount;
-                        double wallRate;
+                        double wallRatio;
                         if (!int.TryParse(tbCAWidth.Text, out roomWidth))
                         {
                             MessageBox.Show("너비 입력이 잘못되었습니다. 숫자를 입력해주세요.");
@@ -116,7 +112,7 @@ namespace PGToolsApp
                             MessageBox.Show("높이 입력이 잘못되었습니다. 숫자를 입력해주세요.");
                             break;
                         }
-                        if (!double.TryParse(tbCAWallRatio.Text, out wallRate))
+                        if (!double.TryParse(tbCAWallRatio.Text, out wallRatio))
                         {
                             MessageBox.Show("비율 입력이 잘못되었습니다. 0.0에서 0.1 사이의 소수를 입력해주세요.");
                             break;
@@ -127,17 +123,12 @@ namespace PGToolsApp
                             break;
                         }
 
-                        TagCA tca = new TagCA();
-                        tca.RoomWidth = roomWidth;
-                        tca.RoomHeight = roomHeight;
-                        tca.WallRatio = wallRate;
-                        tca.RunCount = runCount;
-                        RunCA(tca);
+                        ShowGenFormCA(roomWidth, roomHeight, runCount, wallRatio);
                     }
                     break;
                 case (int)PG_ALGORITHM.PN:
                     {
-                        int roomWidth, roomHeight, octave;
+                        int roomWidth, roomHeight, octaveCount;
                         if (!int.TryParse(tbPNWidth.Text, out roomWidth))
                         {
                             MessageBox.Show("너비 입력이 잘못되었습니다. 숫자를 입력해주세요.");
@@ -148,68 +139,40 @@ namespace PGToolsApp
                             MessageBox.Show("높이 입력이 잘못되었습니다. 숫자를 입력해주세요.");
                             break;
                         }
-                        if (!int.TryParse(cbPNOctaveCount.Text, out octave))
+                        if (!int.TryParse(cbPNOctaveCount.Text, out octaveCount))
                         {
                             MessageBox.Show("옥타브 입력이 잘못되었습니다. 숫자를 입력해주세요.");
                             break;
                         }
 
-                        TagPN tpn = new TagPN();
-                        tpn.RoomWidth = roomWidth;
-                        tpn.RoomHeight = roomHeight;
-                        tpn.OctaveCount = octave;
-                        RunPN(tpn);
+                        ShowGenFormPN(roomWidth, roomHeight, octaveCount);
                     }
                     break;
             }
         }
 
-        private void RunBSP(object obj)
+        private void ShowGenFormBSP(int roomSize, int depth)
         {
-            TagBSP tbsp = (TagBSP)obj;
-            BSP bsp = new BSP(tbsp.RoomWidth, tbsp.RoomHeight, tbsp.Depth);
-            bsp.GenerateRoom();
-
-            GenForm genForm = new GenForm(this);
-            genForm.BitmapBoard = bsp.Room;
-            genForm.TBSP = tbsp;
-            genForm.CurrentAlgorithm = PG_ALGORITHM.BSP;
-            genForm.ShowDialog();
+            GenForm gf = new GenForm(this);
+            gf.CurrentAlgorithm = PG_ALGORITHM.BSP;
+            gf.BSP = new BinarySpacePartitioning(roomSize, depth);
+            gf.ShowDialog();
         }
 
-        private void RunCA(object obj)
+        private void ShowGenFormCA(int roomWidth, int roomHeight, int runCount, double wallRatio)
         {
-            TagCA tca = (TagCA)obj;
-            CA ca = new CA(tca);
-            ca.Generate();
-
-            GenForm genForm = new GenForm(this);
-            genForm.BitmapBoard = ca.Room;
-            genForm.TCA = tca;
-            genForm.CurrentAlgorithm = PG_ALGORITHM.CA;
-            genForm.ShowDialog();
+            GenForm gf = new GenForm(this);
+            gf.CurrentAlgorithm = PG_ALGORITHM.CA;
+            gf.CA = new CellularAutomata(roomWidth, roomHeight, runCount, wallRatio);
+            gf.ShowDialog();
         }
 
-        private void RunPN(object obj)
+        private void ShowGenFormPN(int roomWidth, int roomHeight, int octaveCount)
         {
-            TagPN tpn = (TagPN)obj;
-            PN pn = new PN();
-            GenForm genForm = new GenForm(this);
-
-            genForm.BitmapBoard = new int[tpn.RoomHeight, tpn.RoomWidth];
-            tpn.Room = pn.GeneratePerlinNoise(pn.GenerateWhiteNoise(tpn.RoomWidth, tpn.RoomHeight), tpn.OctaveCount);
-            for (int y = 0; y < tpn.RoomHeight; ++y)
-            {
-                for (int x = 0; x < tpn.RoomWidth; ++x)
-                {
-                    int alpha = Math.Abs((int)(tpn.Room[y][x] * 255));
-                    genForm.BitmapBoard[y, x] = alpha;
-                }
-            }
-
-            genForm.TPN = tpn;
-            genForm.CurrentAlgorithm = PG_ALGORITHM.PN;
-            genForm.ShowDialog();
+            GenForm gf = new GenForm(this);
+            gf.CurrentAlgorithm = PG_ALGORITHM.PN;
+            gf.PN = new PerlinNoise(roomWidth, roomHeight, octaveCount);
+            gf.ShowDialog();
         }
     }
 }

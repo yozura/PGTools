@@ -65,14 +65,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BSP.cs" />
-    <Compile Include="CA.cs" />
+    <Compile Include="BinarySpacePartitioning.cs" />
+    <Compile Include="CellularAutomata.cs" />
     <Compile Include="GenForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GenForm.Designer.cs">
       <DependentUpon>GenForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="IProceduralGenerator.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -85,7 +86,7 @@
     <Compile Include="OptionForm.Designer.cs">
       <DependentUpon>OptionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PN.cs" />
+    <Compile Include="PerlinNoise.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="GenForm.resx">

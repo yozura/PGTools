@@ -12,9 +12,9 @@ namespace PGToolsApp
 
         public int[,] BitmapBoard { get; set; }
 
-        public TagBSP TBSP { get; set; }
-        public TagCA TCA { get; set; }
-        public TagPN TPN { get; set; }
+        public BinarySpacePartitioning BSP { get; set; }
+        public CellularAutomata CA { get; set; }
+        public PerlinNoise PN { get; set; }
 
         public PG_ALGORITHM CurrentAlgorithm { get; set; }
 
@@ -37,18 +37,27 @@ namespace PGToolsApp
 
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                bitmapWidth = TBSP.RoomWidth;
-                bitmapHeight = TBSP.RoomHeight;
+                bitmapWidth = BSP.Info.RoomWidth;
+                bitmapHeight = BSP.Info.RoomHeight;
+
+                BSP.Generate();
+                BitmapBoard = BSP.Room;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
-                bitmapWidth = TCA.RoomWidth;
-                bitmapHeight = TCA.RoomHeight;
+                bitmapWidth = CA.Info.RoomWidth;
+                bitmapHeight = CA.Info.RoomHeight;
+
+                CA.Generate();
+                BitmapBoard = CA.Room;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                bitmapWidth = TPN.RoomWidth;
-                bitmapHeight = TPN.RoomHeight;
+                bitmapWidth = PN.Info.RoomWidth;
+                bitmapHeight = PN.Info.RoomHeight;
+
+                PN.Generate();
+                BitmapBoard = PN.Room;
             }
 
             this.ClientSize = new Size(bitmapWidth + panelBtns.Width, bitmapHeight);
@@ -71,9 +80,9 @@ namespace PGToolsApp
 
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                for (int y = 0; y < TBSP.RoomHeight; ++y)
+                for (int y = 0; y < BSP.Info.RoomHeight; ++y)
                 {
-                    for (int x = 0; x < TBSP.RoomWidth; ++x)
+                    for (int x = 0; x < BSP.Info.RoomWidth; ++x)
                     {
                         switch (BitmapBoard[y, x])
                         {
@@ -90,9 +99,9 @@ namespace PGToolsApp
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
-                for (int y = 0; y < TCA.RoomHeight; ++y)
+                for (int y = 0; y < CA.Info.RoomHeight; ++y)
                 {
-                    for (int x = 0; x < TCA.RoomWidth; ++x)
+                    for (int x = 0; x < CA.Info.RoomWidth; ++x)
                     {
                         switch (BitmapBoard[y, x])
                         {
@@ -108,9 +117,9 @@ namespace PGToolsApp
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                for (int y = 0; y < TPN.RoomHeight; ++y)
+                for (int y = 0; y < PN.Info.RoomHeight; ++y)
                 {
-                    for (int x = 0; x < TPN.RoomWidth; ++x)
+                    for (int x = 0; x < PN.Info.RoomWidth; ++x)
                     {
                         graphics.FillRectangle(new SolidBrush(Color.FromArgb(BitmapBoard[y, x], Color.Black)), x, y, 1, 1);
                     }
@@ -120,70 +129,9 @@ namespace PGToolsApp
 
         private void btnSave_Click(object sender, System.EventArgs e)
         {
-            if (CurrentAlgorithm == PG_ALGORITHM.BSP)
-            {
-                SaveBSP();
-            }
-            else if (CurrentAlgorithm == PG_ALGORITHM.CA)
-            {
-                SaveCA();
-            }
-            else if (CurrentAlgorithm == PG_ALGORITHM.PN)
-            {
-                SavePN();
-            }
-        }
-
-        private void btnRedraw_Click(object sender, System.EventArgs e)
-        {
-            btnSave.Enabled = false;
-            btnRedraw.Enabled = false;
-            
-            Redraw();
-            Refresh();
-            
-            btnSave.Enabled = true;
-            btnRedraw.Enabled = true;
-        }
-
-        private void btnExit_Click(object sender, System.EventArgs e)
-        {
-            Close();
-        }
-
-        private void Redraw()
-        {
-            if (CurrentAlgorithm == PG_ALGORITHM.BSP) RedrawBSP();
-            else if (CurrentAlgorithm == PG_ALGORITHM.CA) RedrawCA();
-            else if (CurrentAlgorithm == PG_ALGORITHM.PN) RedrawPN();
-        }
-
-        private void RedrawBSP()
-        {
-            BSP bsp = new BSP(TBSP);
-            bsp.GenerateRoom();
-            BitmapBoard = bsp.Room;
-        }
-
-        private void RedrawCA()
-        {
-            CA ca = new CA(TCA);
-            ca.Generate();
-            BitmapBoard = ca.Room;
-        }
-
-        private void RedrawPN()
-        {
-            PN pn = new PN();
-            TPN.Room = pn.GeneratePerlinNoise(pn.GenerateWhiteNoise(TPN.RoomWidth, TPN.RoomHeight), TPN.OctaveCount);
-            for (int y = 0; y < TPN.RoomWidth; ++y)
-            {
-                for (int x = 0; x < TPN.RoomHeight; ++x)
-                {
-                    int alpha = Math.Abs((int)(TPN.Room[y][x] * 255));
-                    BitmapBoard[y, x] = alpha;
-                }
-            }
+            if (CurrentAlgorithm == PG_ALGORITHM.BSP) SaveBSP();
+            else if (CurrentAlgorithm == PG_ALGORITHM.CA) SaveCA();
+            else if (CurrentAlgorithm == PG_ALGORITHM.PN) SavePN();
         }
 
         private void SaveBSP()
@@ -204,13 +152,16 @@ namespace PGToolsApp
                 {
                     using (StreamWriter sw = new StreamWriter(path))
                     {
-                        sw.Write(TBSP.RoomHeight);
+                        int roomHegiht = BSP.Info.RoomHeight;
+                        int roomWidth = BSP.Info.RoomWidth;
+
+                        sw.Write(roomHegiht);
                         sw.WriteLine();
-                        sw.Write(TBSP.RoomWidth);
+                        sw.Write(roomWidth);
                         sw.WriteLine();
-                        for (int y = 0; y < TBSP.RoomHeight; ++y)
+                        for (int y = 0; y < roomHegiht; ++y)
                         {
-                            for (int x = 0; x < TBSP.RoomWidth; ++x)
+                            for (int x = 0; x < roomWidth; ++x)
                             {
                                 sw.Write(BitmapBoard[y, x]);
                             }
@@ -257,13 +208,16 @@ namespace PGToolsApp
                 {
                     using (StreamWriter sw = new StreamWriter(path))
                     {
-                        sw.Write(TCA.RoomHeight);
+                        int roomHeight = CA.Info.RoomHeight;
+                        int roomWidth = CA.Info.RoomWidth;
+
+                        sw.Write(roomHeight);
                         sw.WriteLine();
-                        sw.Write(TCA.RoomWidth);
+                        sw.Write(roomWidth);
                         sw.WriteLine();
-                        for (int y = 0; y < TCA.RoomHeight; ++y)
+                        for (int y = 0; y < roomHeight; ++y)
                         {
-                            for (int x = 0; x < TCA.RoomWidth; ++x)
+                            for (int x = 0; x < roomWidth; ++x)
                             {
                                 sw.Write(BitmapBoard[y, x]);
                             }
@@ -323,6 +277,30 @@ namespace PGToolsApp
 
                 MessageBox.Show($"{path} 파일 저장에 성공했습니다.");
             }
+        }
+
+        private void btnRedraw_Click(object sender, System.EventArgs e)
+        {
+            btnSave.Enabled = false;
+            btnRedraw.Enabled = false;
+            
+            Regenerate();
+            Refresh();
+            
+            btnSave.Enabled = true;
+            btnRedraw.Enabled = true;
+        }
+
+        private void btnExit_Click(object sender, System.EventArgs e)
+        {
+            Close();
+        }
+
+        private void Regenerate()
+        {
+            if (CurrentAlgorithm == PG_ALGORITHM.BSP) BSP.Generate();
+            else if (CurrentAlgorithm == PG_ALGORITHM.CA) CA.Generate();
+            else if (CurrentAlgorithm == PG_ALGORITHM.PN) PN.Generate();
         }
     }
 }

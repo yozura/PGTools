@@ -2,20 +2,34 @@
 
 namespace PGToolsApp
 {
-    public class TagPN
+    public struct PNInformation
     {
         public int RoomWidth { get; set; }
         public int RoomHeight { get; set; }
         public int OctaveCount { get; set; }
-        public float[][] Room { get; set; }
     }
 
-    public class PN
+    public class PerlinNoise : IProceduralGenerator
     {
-        // 노이즈의 기본이 되는 랜덤 난수 배열 생성기
-        public float[][] GenerateWhiteNoise(int width, int height)
+        public PNInformation Info { get; set; }
+        public float[][] Room { get; set; }
+        public Random Rand { get; set; }
+
+        public PerlinNoise(PNInformation info)
         {
-            Random random = new Random();
+            Info = info;
+
+            Rand = new Random();
+        } 
+
+        public void Generate()
+        {
+
+        }
+
+        // 노이즈의 기본이 되는 랜덤 난수 배열 생성기
+        private float[][] GenerateWhiteNoise(int width, int height)
+        {
             float[][] noise = new float[height][];
             for (int i = 0; i < height; ++i)
                 noise[i] = new float[width];
@@ -24,7 +38,7 @@ namespace PGToolsApp
             {
                 for (int x = 0; x < width; x++)
                 {
-                    noise[y][x] = (float)random.NextDouble() % 1;
+                    noise[y][x] = (float)Rand.NextDouble() % 1;
                 }
             }
 

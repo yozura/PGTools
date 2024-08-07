@@ -12,8 +12,8 @@ namespace PGToolsApp
 
         public int[,] BitmapBoard { get; set; }
 
-        public BSPInformation BSPInfo { get; set; }
-        public TagCA TCA { get; set; }
+        public BinarySpacePartitioning BSP { get; set; }
+        public CellularAutomata CA { get; set; }
         public TagPN TPN { get; set; }
 
         public PG_ALGORITHM CurrentAlgorithm { get; set; }
@@ -37,14 +37,19 @@ namespace PGToolsApp
 
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                bitmapWidth = BSPInfo.RoomWidth;
-                bitmapHeight = BSPInfo.RoomHeight;
+                bitmapWidth = BSP.Info.RoomWidth;
+                bitmapHeight = BSP.Info.RoomHeight;
 
+                BSP.Generate();
+                BitmapBoard = BSP.Room;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
-                bitmapWidth = TCA.RoomWidth;
-                bitmapHeight = TCA.RoomHeight;
+                bitmapWidth = CA.Info.RoomWidth;
+                bitmapHeight = CA.Info.RoomHeight;
+
+                CA.Generate();
+                BitmapBoard = CA.Room;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
@@ -72,9 +77,12 @@ namespace PGToolsApp
 
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                for (int y = 0; y < BSPInfo.RoomHeight; ++y)
+                int roomHeight = BSP.Info.RoomHeight;
+                int roomWidth  = BSP.Info.RoomWidth;
+
+                for (int y = 0; y < roomHeight; ++y)
                 {
-                    for (int x = 0; x < BSPInfo.RoomWidth; ++x)
+                    for (int x = 0; x < roomWidth; ++x)
                     {
                         switch (BitmapBoard[y, x])
                         {
@@ -91,9 +99,12 @@ namespace PGToolsApp
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
-                for (int y = 0; y < TCA.RoomHeight; ++y)
+                int roomHeight = CA.Info.RoomHeight;
+                int roomWidth = CA.Info.RoomWidth;
+
+                for (int y = 0; y < roomHeight; ++y)
                 {
-                    for (int x = 0; x < TCA.RoomWidth; ++x)
+                    for (int x = 0; x < roomWidth; ++x)
                     {
                         switch (BitmapBoard[y, x])
                         {
@@ -154,39 +165,23 @@ namespace PGToolsApp
 
         private void Redraw()
         {
-            if (CurrentAlgorithm == PG_ALGORITHM.BSP) RedrawBSP();
-            else if (CurrentAlgorithm == PG_ALGORITHM.CA) RedrawCA();
-            else if (CurrentAlgorithm == PG_ALGORITHM.PN) RedrawPN();
-        }
-
-        private void RedrawBSP()
-        {
-            BSP bsp = new BSP(BSPInfo);
-            bsp.Generate();
-            BitmapBoard = bsp.Room;
-        }
-
-        private void RedrawCA()
-        {
-            CA ca = new CA(TCA);
-            ca.Generate();
-            BitmapBoard = ca.Room;
-        }
-
-        private void RedrawPN()
-        {
-            PN pn = new PN();
-            TPN.Room = pn.GeneratePerlinNoise(pn.GenerateWhiteNoise(TPN.RoomWidth, TPN.RoomHeight), TPN.OctaveCount);
-            for (int y = 0; y < TPN.RoomWidth; ++y)
+            if (CurrentAlgorithm == PG_ALGORITHM.BSP) BSP.Generate();
+            else if (CurrentAlgorithm == PG_ALGORITHM.CA) CA.Generate();
+            else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                for (int x = 0; x < TPN.RoomHeight; ++x)
+                PN pn = new PN();
+                TPN.Room = pn.GeneratePerlinNoise(pn.GenerateWhiteNoise(TPN.RoomWidth, TPN.RoomHeight), TPN.OctaveCount);
+                for (int y = 0; y < TPN.RoomWidth; ++y)
                 {
-                    int alpha = Math.Abs((int)(TPN.Room[y][x] * 255));
-                    BitmapBoard[y, x] = alpha;
+                    for (int x = 0; x < TPN.RoomHeight; ++x)
+                    {
+                        int alpha = Math.Abs((int)(TPN.Room[y][x] * 255));
+                        BitmapBoard[y, x] = alpha;
+                    }
                 }
             }
-        }
 
+        }
         private void SaveBSP()
         {
             // txt 파일로 저장 -> Wall은 1, Empty는 0
@@ -205,13 +200,16 @@ namespace PGToolsApp
                 {
                     using (StreamWriter sw = new StreamWriter(path))
                     {
-                        sw.Write(BSPInfo.RoomHeight);
+                        int roomHegiht = BSP.Info.RoomHeight;
+                        int roomWidth = BSP.Info.RoomWidth;
+
+                        sw.Write(roomHegiht);
                         sw.WriteLine();
-                        sw.Write(BSPInfo.RoomWidth);
+                        sw.Write(roomWidth);
                         sw.WriteLine();
-                        for (int y = 0; y < BSPInfo.RoomHeight; ++y)
+                        for (int y = 0; y < roomHegiht; ++y)
                         {
-                            for (int x = 0; x < BSPInfo.RoomWidth; ++x)
+                            for (int x = 0; x < roomWidth; ++x)
                             {
                                 sw.Write(BitmapBoard[y, x]);
                             }
@@ -258,13 +256,16 @@ namespace PGToolsApp
                 {
                     using (StreamWriter sw = new StreamWriter(path))
                     {
-                        sw.Write(TCA.RoomHeight);
+                        int roomHeight = CA.Info.RoomHeight;
+                        int roomWidth = CA.Info.RoomWidth;
+
+                        sw.Write(roomHeight);
                         sw.WriteLine();
-                        sw.Write(TCA.RoomWidth);
+                        sw.Write(roomWidth);
                         sw.WriteLine();
-                        for (int y = 0; y < TCA.RoomHeight; ++y)
+                        for (int y = 0; y < roomHeight; ++y)
                         {
-                            for (int x = 0; x < TCA.RoomWidth; ++x)
+                            for (int x = 0; x < roomWidth; ++x)
                             {
                                 sw.Write(BitmapBoard[y, x]);
                             }

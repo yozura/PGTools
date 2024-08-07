@@ -65,8 +65,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BSP.cs" />
-    <Compile Include="CA.cs" />
+    <Compile Include="BinarySpacePartitioning.cs" />
+    <Compile Include="CellularAutomata.cs" />
     <Compile Include="GenForm.cs">
       <SubType>Form</SubType>
     </Compile>

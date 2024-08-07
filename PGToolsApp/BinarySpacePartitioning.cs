@@ -10,15 +10,15 @@ namespace PGToolsApp
         public int RoomHeight { get; set; }
         public int Depth { get; set; }
 
-        public BSPInformation(int width, int height, int depth)
+        public BSPInformation(int roomSize, int depth)
         {
-            RoomWidth = width;
-            RoomHeight = height;   
+            RoomWidth = roomSize;
+            RoomHeight = roomSize;
             Depth = depth;
         }
     }
 
-    public class BSP : IProceduralGenerator
+    public class BinarySpacePartitioning : IProceduralGenerator
     {
         public BSPInformation Info { get; set; }
         public int[,] Room { get; set; }
@@ -44,15 +44,15 @@ namespace PGToolsApp
             }
         }
 
-        public BSP(int roomWidth, int roomHeight, int depth)
+        public BinarySpacePartitioning(int roomSize, int depth)
         {
-            Info = new BSPInformation(roomWidth, roomHeight, depth);
+            Info = new BSPInformation(roomSize, depth);
 
             Room = new int[Info.RoomWidth, Info.RoomHeight];
             Rand = new Random();
         }
 
-        public BSP(BSPInformation info)
+        public BinarySpacePartitioning(BSPInformation info)
         {
             Info = info;
 
@@ -62,6 +62,7 @@ namespace PGToolsApp
 
         public void Generate()
         {
+            Array.Clear(Room, 0, Room.Length);
             DivideRoom(Info.Depth, 0, 0, Info.RoomWidth, Info.RoomHeight);
         }
         

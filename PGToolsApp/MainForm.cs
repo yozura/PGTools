@@ -128,7 +128,7 @@ namespace PGToolsApp
                     break;
                 case (int)PG_ALGORITHM.PN:
                     {
-                        int roomWidth, roomHeight, octave;
+                        int roomWidth, roomHeight, octaveCount;
                         if (!int.TryParse(tbPNWidth.Text, out roomWidth))
                         {
                             MessageBox.Show("너비 입력이 잘못되었습니다. 숫자를 입력해주세요.");
@@ -139,17 +139,13 @@ namespace PGToolsApp
                             MessageBox.Show("높이 입력이 잘못되었습니다. 숫자를 입력해주세요.");
                             break;
                         }
-                        if (!int.TryParse(cbPNOctaveCount.Text, out octave))
+                        if (!int.TryParse(cbPNOctaveCount.Text, out octaveCount))
                         {
                             MessageBox.Show("옥타브 입력이 잘못되었습니다. 숫자를 입력해주세요.");
                             break;
                         }
 
-                        TagPN tpn = new TagPN();
-                        tpn.RoomWidth = roomWidth;
-                        tpn.RoomHeight = roomHeight;
-                        tpn.OctaveCount = octave;
-                        RunPN(tpn);
+                        ShowGenFormPN(roomWidth, roomHeight, octaveCount);
                     }
                     break;
             }
@@ -171,26 +167,12 @@ namespace PGToolsApp
             gf.ShowDialog();
         }
 
-        private void RunPN(object obj)
+        private void ShowGenFormPN(int roomWidth, int roomHeight, int octaveCount)
         {
-            TagPN tpn = (TagPN)obj;
-            PN pn = new PN();
-            GenForm genForm = new GenForm(this);
-
-            genForm.BitmapBoard = new int[tpn.RoomHeight, tpn.RoomWidth];
-            tpn.Room = pn.GeneratePerlinNoise(pn.GenerateWhiteNoise(tpn.RoomWidth, tpn.RoomHeight), tpn.OctaveCount);
-            for (int y = 0; y < tpn.RoomHeight; ++y)
-            {
-                for (int x = 0; x < tpn.RoomWidth; ++x)
-                {
-                    int alpha = Math.Abs((int)(tpn.Room[y][x] * 255));
-                    genForm.BitmapBoard[y, x] = alpha;
-                }
-            }
-
-            genForm.TPN = tpn;
-            genForm.CurrentAlgorithm = PG_ALGORITHM.PN;
-            genForm.ShowDialog();
+            GenForm gf = new GenForm(this);
+            gf.CurrentAlgorithm = PG_ALGORITHM.PN;
+            gf.PN = new PerlinNoise(roomWidth, roomHeight, octaveCount);
+            gf.ShowDialog();
         }
     }
 }

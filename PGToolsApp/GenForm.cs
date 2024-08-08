@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
-using System.Drawing.Imaging;
 
 namespace PGToolsApp
 {
@@ -73,58 +74,89 @@ namespace PGToolsApp
             }
         }
 
-        private void pbBitmap_Paint(object sender, PaintEventArgs e)
+        private void DrawBitmap(Graphics graphics)
         {
-            Graphics graphics = e.Graphics;
-            graphics.Clear(Color.White);
+            int roomHeight, roomWidth;
+            Action<Graphics, int, int> drawAction;
 
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                for (int y = 0; y < BSP.Info.RoomHeight; ++y)
-                {
-                    for (int x = 0; x < BSP.Info.RoomWidth; ++x)
-                    {
-                        switch (BitmapBoard[y, x])
-                        {
-                            case (int)BSP_TILE_TYPE.EMPTY:
-                                graphics.FillRectangle(Brushes.Black, x, y, 1, 1);
-                                break;
-                            case (int)BSP_TILE_TYPE.WALL:
-                            case (int)BSP_TILE_TYPE.CORRIDOR:
-                                graphics.DrawRectangle(Pens.White, x, y, 1, 1);
-                                break;
-                        }
-                    }
-                }
+                roomHeight = BSP.Info.RoomHeight;
+                roomWidth = BSP.Info.RoomWidth;
+                drawAction = DrawBSP;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
-                for (int y = 0; y < CA.Info.RoomHeight; ++y)
-                {
-                    for (int x = 0; x < CA.Info.RoomWidth; ++x)
-                    {
-                        switch (BitmapBoard[y, x])
-                        {
-                            case (int)CA_TILE_TYPE.EMPTY:
-                                graphics.DrawRectangle(Pens.White, x, y, 1, 1);
-                                break;
-                            case (int)CA_TILE_TYPE.WALL:
-                                graphics.FillRectangle(Brushes.Black, x, y, 1, 1);
-                                break;
-                        }
-                    }
-                }
+                roomHeight = CA.Info.RoomHeight;
+                roomWidth = CA.Info.RoomWidth;
+                drawAction = DrawCA;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                for (int y = 0; y < PN.Info.RoomHeight; ++y)
+                roomHeight = PN.Info.RoomHeight;
+                roomWidth = PN.Info.RoomWidth;
+                drawAction = DrawPN;
+            }
+            else
+            {
+#if DEBUG
+                Debug.Assert(false);
+#endif
+                return;
+            }
+
+            for (int y = 0; y < roomHeight; ++y)
+            {
+                for (int x = 0; x < roomWidth; ++x)
                 {
-                    for (int x = 0; x < PN.Info.RoomWidth; ++x)
-                    {
-                        graphics.FillRectangle(new SolidBrush(Color.FromArgb(BitmapBoard[y, x], Color.Black)), x, y, 1, 1);
-                    }
+                    drawAction(graphics, x, y);
                 }
             }
+        }
+
+        private void DrawBSP(Graphics graphics, int x, int y)
+        {
+            switch (BitmapBoard[y, x])
+            {
+                case (int)BSP_TILE_TYPE.EMPTY:
+                    graphics.FillRectangle(Brushes.Black, x, y, 1, 1);
+                    break;
+                case (int)BSP_TILE_TYPE.WALL:
+                case (int)BSP_TILE_TYPE.CORRIDOR:
+                    graphics.DrawRectangle(Pens.White, x, y, 1, 1);
+                    break;
+            }
+        }
+
+        private void DrawCA(Graphics graphics, int x, int y)
+        {
+            switch (BitmapBoard[y, x])
+            {
+                case (int)CA_TILE_TYPE.EMPTY:
+                    graphics.DrawRectangle(Pens.White, x, y, 1, 1);
+                    break;
+                case (int)CA_TILE_TYPE.WALL:
+                    graphics.FillRectangle(Brushes.Black, x, y, 1, 1);
+                    break;
+            }
+        }
+
+        private void DrawPN(Graphics graphics, int x, int y)
+        {
+            graphics.FillRectangle(new SolidBrush(Color.FromArgb(BitmapBoard[y, x], Color.Black)), x, y, 1, 1);
+        }
+
+        private void pbBitmap_Paint(object sender, PaintEventArgs e)
+        {
+            BufferedGraphicsContext bgc = BufferedGraphicsManager.Current;
+            BufferedGraphics bg = bgc.Allocate(e.Graphics, e.ClipRectangle);
+            Graphics g2 = bg.Graphics;
+            g2.Clear(Color.White);
+
+            DrawBitmap(g2);
+
+            bg.Render(e.Graphics);
+            bg.Dispose();
         }
 
         private void btnSave_Click(object sender, System.EventArgs e)

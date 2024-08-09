@@ -17,6 +17,12 @@
             {
                 components.Dispose();
             }
+
+            if (disposing && (BackBuffer != null))
+            {
+                BackBuffer.Dispose();
+            }
+
             base.Dispose(disposing);
         }
 

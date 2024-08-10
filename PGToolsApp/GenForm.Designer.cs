@@ -80,18 +80,18 @@
             this.panelBtns.Controls.Add(this.btnExit);
             this.panelBtns.Controls.Add(this.btnRedraw);
             this.panelBtns.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panelBtns.Location = new System.Drawing.Point(389, 0);
+            this.panelBtns.Location = new System.Drawing.Point(256, 0);
+            this.panelBtns.Margin = new System.Windows.Forms.Padding(0);
             this.panelBtns.Name = "panelBtns";
-            this.panelBtns.Size = new System.Drawing.Size(139, 448);
+            this.panelBtns.Size = new System.Drawing.Size(144, 256);
             this.panelBtns.TabIndex = 4;
             // 
             // pbBitmap
             // 
-            this.pbBitmap.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbBitmap.Location = new System.Drawing.Point(0, 0);
             this.pbBitmap.Margin = new System.Windows.Forms.Padding(0);
             this.pbBitmap.Name = "pbBitmap";
-            this.pbBitmap.Size = new System.Drawing.Size(389, 448);
+            this.pbBitmap.Size = new System.Drawing.Size(256, 256);
             this.pbBitmap.TabIndex = 5;
             this.pbBitmap.TabStop = false;
             // 
@@ -99,7 +99,7 @@
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(528, 448);
+            this.ClientSize = new System.Drawing.Size(400, 256);
             this.Controls.Add(this.pbBitmap);
             this.Controls.Add(this.panelBtns);
             this.Cursor = System.Windows.Forms.Cursors.Default;

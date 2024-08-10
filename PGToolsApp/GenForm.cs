@@ -13,6 +13,7 @@ namespace PGToolsApp
     {
         private Form parent;
         private BufferedGraphics BackBuffer;
+        private Bitmap OriginBitmap;
 
         public int[,] BitmapBoard { get; set; }
 
@@ -32,39 +33,36 @@ namespace PGToolsApp
 
             // Set Variable
             this.parent = parent;
+
+            pbBitmap.Width = 256;
+            pbBitmap.Height = 256;
+            pbBitmap.SizeMode = PictureBoxSizeMode.Normal;
         }
         
         private void GenForm_Load(object sender, System.EventArgs e)
         {
-            int bitmapWidth, bitmapHeight;
-            bitmapWidth = bitmapHeight = 256;
-
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                bitmapWidth = BSP.Info.RoomWidth;
-                bitmapHeight = BSP.Info.RoomHeight;
-
                 BSP.Generate();
                 BitmapBoard = BSP.Room;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
-                bitmapWidth = CA.Info.RoomWidth;
-                bitmapHeight = CA.Info.RoomHeight;
-
                 CA.Generate();
                 BitmapBoard = CA.Room;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                bitmapWidth = PN.Info.RoomWidth;
-                bitmapHeight = PN.Info.RoomHeight;
-
                 PN.Generate();
                 BitmapBoard = PN.Room;
             }
-
-            this.ClientSize = new Size(bitmapWidth + panelBtns.Width, bitmapHeight);
+            else
+            {
+#if DEBUG
+                Debug.Assert(false, "Missing the current algorithm.");
+#endif
+                return;
+            }
         }
 
         private void GenForm_Shown(object sender, EventArgs e)
@@ -115,36 +113,36 @@ namespace PGToolsApp
             else
             {
 #if DEBUG
-                Debug.Assert(false, "Not found CurrentAlgorithm");
+                Debug.Assert(false, "Missing the current algorithm.");
 #endif
                 return;
             }
 
-            using (Bitmap bitmap = new Bitmap(roomWidth, roomHeight, PixelFormat.Format24bppRgb))
+            OriginBitmap?.Dispose();
+            OriginBitmap = new Bitmap(roomWidth, roomHeight, PixelFormat.Format24bppRgb);
+
+            BitmapData bitmapData = OriginBitmap.LockBits(
+                new Rectangle(0, 0, OriginBitmap.Width, OriginBitmap.Height),
+                ImageLockMode.WriteOnly,
+                OriginBitmap.PixelFormat);
+
+            int bytesPerPixel = Image.GetPixelFormatSize(OriginBitmap.PixelFormat) / 8;
+            int byteCount = bitmapData.Stride * OriginBitmap.Height;
+            byte[] pixels = new byte[byteCount];
+            IntPtr ptrFirstPixel = bitmapData.Scan0;
+
+            Parallel.For(0, roomHeight, y =>
             {
-                BitmapData bitmapData = bitmap.LockBits(
-                    new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                    ImageLockMode.WriteOnly,
-                    bitmap.PixelFormat);
-
-                int bytesPerPixel = Image.GetPixelFormatSize(bitmap.PixelFormat) / 8;
-                int byteCount = bitmapData.Stride * bitmap.Height;
-                byte[] pixels = new byte[byteCount];
-                IntPtr ptrFirstPixel = bitmapData.Scan0;
-
-                Parallel.For(0, roomHeight, y =>
+                Parallel.For(0, roomWidth, x =>
                 {
-                    Parallel.For(0, roomWidth, x =>
-                    {
-                        drawAction(pixels, x, y, bitmapData.Stride, bytesPerPixel);
-                    });
+                    drawAction(pixels, x, y, bitmapData.Stride, bytesPerPixel);
                 });
+            });
 
-                Marshal.Copy(pixels, 0, ptrFirstPixel, pixels.Length);
-                bitmap.UnlockBits(bitmapData);
+            Marshal.Copy(pixels, 0, ptrFirstPixel, pixels.Length);
+            OriginBitmap.UnlockBits(bitmapData);
 
-                graphics.DrawImage(bitmap, 0, 0);
-            }
+            graphics.DrawImage(OriginBitmap, 0, 0, 256, 256);
         }
 
         private void DrawBSP(byte[] pixels, int x, int y, int stride, int bytesPerPixel)
@@ -196,18 +194,14 @@ namespace PGToolsApp
 
         private void btnSave_Click(object sender, System.EventArgs e)
         {
-            if (CurrentAlgorithm == PG_ALGORITHM.BSP) SaveBSP();
-            else if (CurrentAlgorithm == PG_ALGORITHM.CA) SaveCA();
-            else if (CurrentAlgorithm == PG_ALGORITHM.PN) SavePN();
+            SaveBitmap();
         }
 
-        private void SaveBSP()
+        private void SaveBitmap()
         {
-            // txt 파일로 저장 -> Wall은 1, Empty는 0
-            // png 파일로 저장 가능
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.InitialDirectory = "C:\\";
-            sfd.Filter = "txt files (*.txt)|*.txt|png files (*.png)|*.png|All Files (*.*)|*.*";
+            sfd.Filter = "txt files (*.txt)|*.txt|bmp files(*.bmp)|*.bmp|png files (*.png)|*.png|jpg files (*.jpg)|*.jpg";
             sfd.FilterIndex = 1;
             sfd.RestoreDirectory = true;
 
@@ -215,20 +209,18 @@ namespace PGToolsApp
             {
                 string path = sfd.FileName;
                 string extension = Path.GetExtension(path);
+
                 if (extension == ".txt")
                 {
                     using (StreamWriter sw = new StreamWriter(path))
                     {
-                        int roomHegiht = BSP.Info.RoomHeight;
-                        int roomWidth = BSP.Info.RoomWidth;
-
-                        sw.Write(roomHegiht);
+                        sw.Write(OriginBitmap.Height);
                         sw.WriteLine();
-                        sw.Write(roomWidth);
+                        sw.Write(OriginBitmap.Width);
                         sw.WriteLine();
-                        for (int y = 0; y < roomHegiht; ++y)
+                        for (int y = 0; y < OriginBitmap.Height; ++y)
                         {
-                            for (int x = 0; x < roomWidth; ++x)
+                            for (int x = 0; x < OriginBitmap.Width; ++x)
                             {
                                 sw.Write(BitmapBoard[y, x]);
                             }
@@ -238,111 +230,18 @@ namespace PGToolsApp
                 }
                 else
                 {
-                    using (Bitmap bitmap = new Bitmap(pbBitmap.Width, pbBitmap.Height))
-                    {
-                        pbBitmap.DrawToBitmap(bitmap, pbBitmap.ClientRectangle);
-                        ImageFormat format = null;
-                        switch (extension)
-                        {
-                            case ".bmp": format = ImageFormat.Bmp; break;
-                            case ".png": format = ImageFormat.Png; break;
-                            case ".jpeg":
-                            case ".jpg": format = ImageFormat.Jpeg; break;
-                            case ".gif": format = ImageFormat.Gif; break;
-                        }
-                        bitmap.Save(path, format);
-                    }
-                }
-                MessageBox.Show($"{path}에 파일이 저장되었습니다.", "파일 저장 성공");
-            }
-        }
-
-        private void SaveCA()
-        {
-            // txt 파일로 저장 -> Wall은 1, Empty는 0
-            // png 파일로 저장 가능
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.InitialDirectory = "C:\\";
-            sfd.Filter = "txt files (*.txt)|*.txt|png files (*.png)|*.png|All Files (*.*)|*.*";
-            sfd.FilterIndex = 1;
-            sfd.RestoreDirectory = true;
-
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                string path = sfd.FileName;
-                string extension = Path.GetExtension(path);
-                if (extension == ".txt")
-                {
-                    using (StreamWriter sw = new StreamWriter(path))
-                    {
-                        int roomHeight = CA.Info.RoomHeight;
-                        int roomWidth = CA.Info.RoomWidth;
-
-                        sw.Write(roomHeight);
-                        sw.WriteLine();
-                        sw.Write(roomWidth);
-                        sw.WriteLine();
-                        for (int y = 0; y < roomHeight; ++y)
-                        {
-                            for (int x = 0; x < roomWidth; ++x)
-                            {
-                                sw.Write(BitmapBoard[y, x]);
-                            }
-                            sw.WriteLine();
-                        }
-                    }
-                }
-                else
-                {
-                    using (Bitmap bitmap = new Bitmap(pbBitmap.Width, pbBitmap.Height))
-                    {
-                        pbBitmap.DrawToBitmap(bitmap, pbBitmap.ClientRectangle);
-                        ImageFormat format = null;
-                        switch (extension)
-                        {
-                            case ".bmp": format = ImageFormat.Bmp; break;
-                            case ".png": format = ImageFormat.Png; break;
-                            case ".jpeg":
-                            case ".jpg": format = ImageFormat.Jpeg; break;
-                            case ".gif": format = ImageFormat.Gif; break;
-                        }
-                        bitmap.Save(path, format);
-                    }
-                }
-                MessageBox.Show($"{path}에 파일이 저장되었습니다.", "파일 저장 성공");
-            }
-        }
-
-        private void SavePN()
-        {
-            // png 파일로 저장
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.InitialDirectory = "C:\\";
-            sfd.Filter = "bmp file (*.bmp)|*.bmp|png file (*.png)|*.png|All Files (*.*)|*.*";
-            sfd.FilterIndex = 1;
-            sfd.AddExtension = true;
-            sfd.RestoreDirectory = true;
-
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                string path = sfd.FileName;
-                using (Bitmap bitmap = new Bitmap(pbBitmap.Width, pbBitmap.Height))
-                {
-                    pbBitmap.DrawToBitmap(bitmap, pbBitmap.ClientRectangle);
-                    ImageFormat format = null;
-                    string extension = Path.GetExtension(path);
+                    ImageFormat format = ImageFormat.Bmp;
                     switch (extension)
                     {
                         case ".bmp": format = ImageFormat.Bmp; break;
                         case ".png": format = ImageFormat.Png; break;
                         case ".jpeg":
                         case ".jpg": format = ImageFormat.Jpeg; break;
-                        case ".gif": format = ImageFormat.Gif; break;
                     }
-                    bitmap.Save(path, format);
+                    OriginBitmap.Save(path, format);
                 }
 
-                MessageBox.Show($"{path}에 파일이 저장되었습니다.", "파일 저장 성공");
+                MessageBox.Show($"{path} 경로에 파일이 저장되었습니다.", "성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 

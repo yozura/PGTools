@@ -23,6 +23,11 @@
                 BackBuffer.Dispose();
             }
 
+            if (Disposing && (OriginBitmap != null))
+            {
+                OriginBitmap.Dispose();
+            }
+
             base.Dispose(disposing);
         }
 

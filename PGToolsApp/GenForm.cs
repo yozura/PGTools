@@ -1,22 +1,34 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Windows.Forms;
 using System.Drawing.Imaging;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace PGToolsApp
 {
     public partial class GenForm : Form
     {
         private Form parent;
+        private BufferedGraphics BackBuffer;
+        private Bitmap OriginBitmap;
+        private Stopwatch TimeMeasure;
 
         public int[,] BitmapBoard { get; set; }
+
+        public PG_ALGORITHM CurrentAlgorithm { get; set; }
 
         public BinarySpacePartitioning BSP { get; set; }
         public CellularAutomata CA { get; set; }
         public PerlinNoise PN { get; set; }
 
-        public PG_ALGORITHM CurrentAlgorithm { get; set; }
+        public const int DISPLAY_BITMAP_WIDTH  = 256;
+        public const int DISPLAY_BITMAP_HEIGHT = 256;
+
+        public double ElapsedGenerateTime { get; private set; }
+        public double ElapsedDrawingTime { get; private set; }
 
         public GenForm(Form parent)
         {
@@ -32,35 +44,34 @@ namespace PGToolsApp
         
         private void GenForm_Load(object sender, System.EventArgs e)
         {
-            int bitmapWidth, bitmapHeight;
-            bitmapWidth = bitmapHeight = 256;
-
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                bitmapWidth = BSP.Info.RoomWidth;
-                bitmapHeight = BSP.Info.RoomHeight;
-
                 BSP.Generate();
                 BitmapBoard = BSP.Room;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
-                bitmapWidth = CA.Info.RoomWidth;
-                bitmapHeight = CA.Info.RoomHeight;
-
                 CA.Generate();
                 BitmapBoard = CA.Room;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                bitmapWidth = PN.Info.RoomWidth;
-                bitmapHeight = PN.Info.RoomHeight;
-
                 PN.Generate();
                 BitmapBoard = PN.Room;
             }
+            else
+            {
+#if DEBUG
+                Debug.Assert(false, "Missing the current algorithm.");
+#endif
+                return;
+            }
 
-            this.ClientSize = new Size(bitmapWidth + panelBtns.Width, bitmapHeight);
+            pbBitmap.Width = DISPLAY_BITMAP_WIDTH;
+            pbBitmap.Height = DISPLAY_BITMAP_HEIGHT;
+            pbBitmap.SizeMode = PictureBoxSizeMode.Normal;
+
+            TimeMeasure = new Stopwatch();
         }
 
         private void GenForm_Shown(object sender, EventArgs e)
@@ -75,72 +86,131 @@ namespace PGToolsApp
 
         private void pbBitmap_Paint(object sender, PaintEventArgs e)
         {
-            Graphics graphics = e.Graphics;
-            graphics.Clear(Color.White);
+            if (BackBuffer == null)
+            {
+                BufferedGraphicsContext bgc = BufferedGraphicsManager.Current;
+                BackBuffer = bgc.Allocate(e.Graphics, e.ClipRectangle);
+            }
+
+            DrawBitmap(BackBuffer.Graphics);
+            BackBuffer.Render(e.Graphics);
+        }
+
+        private void DrawBitmap(Graphics graphics)
+        {
+            int roomHeight, roomWidth;
+            Action<byte[], int, int, int, int> drawAction;
 
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
             {
-                for (int y = 0; y < BSP.Info.RoomHeight; ++y)
-                {
-                    for (int x = 0; x < BSP.Info.RoomWidth; ++x)
-                    {
-                        switch (BitmapBoard[y, x])
-                        {
-                            case (int)BSP_TILE_TYPE.EMPTY:
-                                graphics.FillRectangle(Brushes.Black, x, y, 1, 1);
-                                break;
-                            case (int)BSP_TILE_TYPE.WALL:
-                            case (int)BSP_TILE_TYPE.CORRIDOR:
-                                graphics.DrawRectangle(Pens.White, x, y, 1, 1);
-                                break;
-                        }
-                    }
-                }
+                roomHeight = BSP.Info.RoomHeight;
+                roomWidth = BSP.Info.RoomWidth;
+                drawAction = DrawBSP;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.CA)
             {
-                for (int y = 0; y < CA.Info.RoomHeight; ++y)
-                {
-                    for (int x = 0; x < CA.Info.RoomWidth; ++x)
-                    {
-                        switch (BitmapBoard[y, x])
-                        {
-                            case (int)CA_TILE_TYPE.EMPTY:
-                                graphics.DrawRectangle(Pens.White, x, y, 1, 1);
-                                break;
-                            case (int)CA_TILE_TYPE.WALL:
-                                graphics.FillRectangle(Brushes.Black, x, y, 1, 1);
-                                break;
-                        }
-                    }
-                }
+                roomHeight = CA.Info.RoomHeight;
+                roomWidth = CA.Info.RoomWidth;
+                drawAction = DrawCA;
             }
             else if (CurrentAlgorithm == PG_ALGORITHM.PN)
             {
-                for (int y = 0; y < PN.Info.RoomHeight; ++y)
-                {
-                    for (int x = 0; x < PN.Info.RoomWidth; ++x)
-                    {
-                        graphics.FillRectangle(new SolidBrush(Color.FromArgb(BitmapBoard[y, x], Color.Black)), x, y, 1, 1);
-                    }
-                }
+                roomHeight = PN.Info.RoomHeight;
+                roomWidth = PN.Info.RoomWidth;
+                drawAction = DrawPN;
             }
+            else
+            {
+#if DEBUG
+                Debug.Assert(false, "Missing the current algorithm.");
+#endif
+                return;
+            }
+
+            OriginBitmap?.Dispose();
+            OriginBitmap = new Bitmap(roomWidth, roomHeight, PixelFormat.Format24bppRgb);
+
+            BitmapData bitmapData = OriginBitmap.LockBits(
+                new Rectangle(0, 0, OriginBitmap.Width, OriginBitmap.Height),
+                ImageLockMode.WriteOnly,
+                OriginBitmap.PixelFormat);
+
+            int bytesPerPixel = Image.GetPixelFormatSize(OriginBitmap.PixelFormat) / 8;
+            int byteCount = bitmapData.Stride * OriginBitmap.Height;
+            byte[] pixels = new byte[byteCount];
+            IntPtr ptrFirstPixel = bitmapData.Scan0;
+
+            Parallel.For(0, roomHeight, y =>
+            {
+                for (int x = 0; x < roomWidth; ++x)
+                {
+                    drawAction(pixels, x, y, bitmapData.Stride, bytesPerPixel);
+                }
+            });
+
+            Marshal.Copy(pixels, 0, ptrFirstPixel, pixels.Length);
+            OriginBitmap.UnlockBits(bitmapData);
+
+            graphics.DrawImage(OriginBitmap, 0, 0, DISPLAY_BITMAP_WIDTH, DISPLAY_BITMAP_HEIGHT);
+        }
+
+        private void DrawBSP(byte[] pixels, int x, int y, int stride, int bytesPerPixel)
+        {
+            int index = y * stride + x * bytesPerPixel;
+            switch (BitmapBoard[y, x])
+            {
+                case (int)BSP_TILE_TYPE.EMPTY:
+                    pixels[index] = 0;
+                    pixels[index + 1] = 0;
+                    pixels[index + 2] = 0;
+                    break;
+                case (int)BSP_TILE_TYPE.WALL:
+                case (int)BSP_TILE_TYPE.CORRIDOR:
+                    pixels[index] = 255;
+                    pixels[index + 1] = 255;
+                    pixels[index + 2] = 255;
+                    break;
+            }
+        }
+
+        private void DrawCA(byte[] pixels, int x, int y, int stride, int bytesPerPixel)
+        {
+            int index = y * stride + x * bytesPerPixel;
+            switch (BitmapBoard[y, x])
+            {
+                case (int)CA_TILE_TYPE.EMPTY:
+                    pixels[index] = 255;
+                    pixels[index + 1] = 255;
+                    pixels[index + 2] = 255;
+                    break;
+                case (int)CA_TILE_TYPE.WALL:
+                    pixels[index] = 0;
+                    pixels[index + 1] = 0;
+                    pixels[index + 2] = 0;
+                    break;
+            }
+        }
+
+        private void DrawPN(byte[] pixels, int x, int y, int stride, int bytesPerPixel)
+        {
+            int index = y * stride + x * bytesPerPixel;
+            byte grayValue = (byte)BitmapBoard[y, x];
+
+            pixels[index] = grayValue;
+            pixels[index + 1] = grayValue;
+            pixels[index + 2] = grayValue;
         }
 
         private void btnSave_Click(object sender, System.EventArgs e)
         {
-            if (CurrentAlgorithm == PG_ALGORITHM.BSP) SaveBSP();
-            else if (CurrentAlgorithm == PG_ALGORITHM.CA) SaveCA();
-            else if (CurrentAlgorithm == PG_ALGORITHM.PN) SavePN();
+            SaveBitmap();
         }
 
-        private void SaveBSP()
+        private void SaveBitmap()
         {
-            // txt 파일로 저장 -> Wall은 1, Empty는 0
-            // png 파일로 저장 가능
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.InitialDirectory = "C:\\";
-            sfd.Filter = "txt files (*.txt)|*.txt|png files (*.png)|*.png|All Files (*.*)|*.*";
+            sfd.Filter = "txt files (*.txt)|*.txt|bmp files(*.bmp)|*.bmp|png files (*.png)|*.png|jpg files (*.jpg)|*.jpg";
             sfd.FilterIndex = 1;
             sfd.RestoreDirectory = true;
 
@@ -148,20 +218,18 @@ namespace PGToolsApp
             {
                 string path = sfd.FileName;
                 string extension = Path.GetExtension(path);
+
                 if (extension == ".txt")
                 {
                     using (StreamWriter sw = new StreamWriter(path))
                     {
-                        int roomHegiht = BSP.Info.RoomHeight;
-                        int roomWidth = BSP.Info.RoomWidth;
-
-                        sw.Write(roomHegiht);
+                        sw.Write(OriginBitmap.Height);
                         sw.WriteLine();
-                        sw.Write(roomWidth);
+                        sw.Write(OriginBitmap.Width);
                         sw.WriteLine();
-                        for (int y = 0; y < roomHegiht; ++y)
+                        for (int y = 0; y < OriginBitmap.Height; ++y)
                         {
-                            for (int x = 0; x < roomWidth; ++x)
+                            for (int x = 0; x < OriginBitmap.Width; ++x)
                             {
                                 sw.Write(BitmapBoard[y, x]);
                             }
@@ -171,127 +239,43 @@ namespace PGToolsApp
                 }
                 else
                 {
-                    using (Bitmap bitmap = new Bitmap(pbBitmap.Width, pbBitmap.Height))
-                    {
-                        pbBitmap.DrawToBitmap(bitmap, pbBitmap.ClientRectangle);
-                        ImageFormat format = null;
-                        switch (extension)
-                        {
-                            case ".bmp": format = ImageFormat.Bmp; break;
-                            case ".png": format = ImageFormat.Png; break;
-                            case ".jpeg":
-                            case ".jpg": format = ImageFormat.Jpeg; break;
-                            case ".gif": format = ImageFormat.Gif; break;
-                        }
-                        bitmap.Save(path, format);
-                    }
-                }
-                MessageBox.Show($"{path} 파일 저장에 성공했습니다.");
-            }
-        }
-
-        private void SaveCA()
-        {
-            // txt 파일로 저장 -> Wall은 1, Empty는 0
-            // png 파일로 저장 가능
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.InitialDirectory = "C:\\";
-            sfd.Filter = "txt files (*.txt)|*.txt|png files (*.png)|*.png|All Files (*.*)|*.*";
-            sfd.FilterIndex = 1;
-            sfd.RestoreDirectory = true;
-
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                string path = sfd.FileName;
-                string extension = Path.GetExtension(path);
-                if (extension == ".txt")
-                {
-                    using (StreamWriter sw = new StreamWriter(path))
-                    {
-                        int roomHeight = CA.Info.RoomHeight;
-                        int roomWidth = CA.Info.RoomWidth;
-
-                        sw.Write(roomHeight);
-                        sw.WriteLine();
-                        sw.Write(roomWidth);
-                        sw.WriteLine();
-                        for (int y = 0; y < roomHeight; ++y)
-                        {
-                            for (int x = 0; x < roomWidth; ++x)
-                            {
-                                sw.Write(BitmapBoard[y, x]);
-                            }
-                            sw.WriteLine();
-                        }
-                    }
-                }
-                else
-                {
-                    using (Bitmap bitmap = new Bitmap(pbBitmap.Width, pbBitmap.Height))
-                    {
-                        pbBitmap.DrawToBitmap(bitmap, pbBitmap.ClientRectangle);
-                        ImageFormat format = null;
-                        switch (extension)
-                        {
-                            case ".bmp": format = ImageFormat.Bmp; break;
-                            case ".png": format = ImageFormat.Png; break;
-                            case ".jpeg":
-                            case ".jpg": format = ImageFormat.Jpeg; break;
-                            case ".gif": format = ImageFormat.Gif; break;
-                        }
-                        bitmap.Save(path, format);
-                    }
-                }
-                MessageBox.Show($"{path} 파일 저장에 성공했습니다.");
-            }
-        }
-
-        private void SavePN()
-        {
-            // png 파일로 저장
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.InitialDirectory = "C:\\";
-            sfd.Filter = "bmp file (*.bmp)|*.bmp|png file (*.png)|*.png|All Files (*.*)|*.*";
-            sfd.FilterIndex = 1;
-            sfd.AddExtension = true;
-            sfd.RestoreDirectory = true;
-
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                string path = sfd.FileName;
-                using (Bitmap bitmap = new Bitmap(pbBitmap.Width, pbBitmap.Height))
-                {
-                    pbBitmap.DrawToBitmap(bitmap, pbBitmap.ClientRectangle);
-                    ImageFormat format = null;
-                    string extension = Path.GetExtension(path);
+                    ImageFormat format = ImageFormat.Bmp;
                     switch (extension)
                     {
                         case ".bmp": format = ImageFormat.Bmp; break;
                         case ".png": format = ImageFormat.Png; break;
                         case ".jpeg":
                         case ".jpg": format = ImageFormat.Jpeg; break;
-                        case ".gif": format = ImageFormat.Gif; break;
                     }
-                    bitmap.Save(path, format);
+                    OriginBitmap.Save(path, format);
                 }
 
-                MessageBox.Show($"{path} 파일 저장에 성공했습니다.");
+                MessageBox.Show($"{path} 경로에 파일이 저장되었습니다.", "성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
-        private void btnRedraw_Click(object sender, System.EventArgs e)
+        private async void btnRedraw_Click(object sender, EventArgs e)
         {
             btnSave.Enabled = false;
             btnRedraw.Enabled = false;
-            
-            Regenerate();
+
+            TimeMeasure.Restart();
+            await Task.Run(() => Regenerate());
+            TimeMeasure.Stop();
+
+            ElapsedGenerateTime = TimeMeasure.ElapsedMilliseconds / 1000.0;
+
+            TimeMeasure.Restart();
             Refresh();
+            TimeMeasure.Stop();
+
+            ElapsedDrawingTime = TimeMeasure.ElapsedMilliseconds / 1000.0;
             
             btnSave.Enabled = true;
             btnRedraw.Enabled = true;
         }
 
-        private void btnExit_Click(object sender, System.EventArgs e)
+        private void btnExit_Click(object sender, EventArgs e)
         {
             Close();
         }

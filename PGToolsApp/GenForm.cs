@@ -14,6 +14,7 @@ namespace PGToolsApp
         private Form parent;
         private BufferedGraphics BackBuffer;
         private Bitmap OriginBitmap;
+        private Stopwatch TimeMeasure;
 
         public int[,] BitmapBoard { get; set; }
 
@@ -26,6 +27,9 @@ namespace PGToolsApp
         public const int DISPLAY_BITMAP_WIDTH  = 256;
         public const int DISPLAY_BITMAP_HEIGHT = 256;
 
+        public double ElapsedGenerateTime { get; private set; }
+        public double ElapsedDrawingTime { get; private set; }
+
         public GenForm(Form parent)
         {
             InitializeComponent();
@@ -36,10 +40,6 @@ namespace PGToolsApp
 
             // Set Variable
             this.parent = parent;
-            
-            pbBitmap.Width = DISPLAY_BITMAP_WIDTH;
-            pbBitmap.Height = DISPLAY_BITMAP_HEIGHT;
-            pbBitmap.SizeMode = PictureBoxSizeMode.Normal;
         }
         
         private void GenForm_Load(object sender, System.EventArgs e)
@@ -66,6 +66,12 @@ namespace PGToolsApp
 #endif
                 return;
             }
+
+            pbBitmap.Width = DISPLAY_BITMAP_WIDTH;
+            pbBitmap.Height = DISPLAY_BITMAP_HEIGHT;
+            pbBitmap.SizeMode = PictureBoxSizeMode.Normal;
+
+            TimeMeasure = new Stopwatch();
         }
 
         private void GenForm_Shown(object sender, EventArgs e)
@@ -252,10 +258,18 @@ namespace PGToolsApp
         {
             btnSave.Enabled = false;
             btnRedraw.Enabled = false;
-            
-            await Task.Run(() => Regenerate());
 
+            TimeMeasure.Restart();
+            await Task.Run(() => Regenerate());
+            TimeMeasure.Stop();
+
+            ElapsedGenerateTime = TimeMeasure.ElapsedMilliseconds / 1000.0;
+
+            TimeMeasure.Restart();
             Refresh();
+            TimeMeasure.Stop();
+
+            ElapsedDrawingTime = TimeMeasure.ElapsedMilliseconds / 1000.0;
             
             btnSave.Enabled = true;
             btnRedraw.Enabled = true;

@@ -23,6 +23,9 @@ namespace PGToolsApp
         public CellularAutomata CA { get; set; }
         public PerlinNoise PN { get; set; }
 
+        public const int DISPLAY_BITMAP_WIDTH  = 256;
+        public const int DISPLAY_BITMAP_HEIGHT = 256;
+
         public GenForm(Form parent)
         {
             InitializeComponent();
@@ -33,9 +36,9 @@ namespace PGToolsApp
 
             // Set Variable
             this.parent = parent;
-
-            pbBitmap.Width = 256;
-            pbBitmap.Height = 256;
+            
+            pbBitmap.Width = DISPLAY_BITMAP_WIDTH;
+            pbBitmap.Height = DISPLAY_BITMAP_HEIGHT;
             pbBitmap.SizeMode = PictureBoxSizeMode.Normal;
         }
         
@@ -133,16 +136,16 @@ namespace PGToolsApp
 
             Parallel.For(0, roomHeight, y =>
             {
-                Parallel.For(0, roomWidth, x =>
+                for (int x = 0; x < roomWidth; ++x)
                 {
                     drawAction(pixels, x, y, bitmapData.Stride, bytesPerPixel);
-                });
+                }
             });
 
             Marshal.Copy(pixels, 0, ptrFirstPixel, pixels.Length);
             OriginBitmap.UnlockBits(bitmapData);
 
-            graphics.DrawImage(OriginBitmap, 0, 0, 256, 256);
+            graphics.DrawImage(OriginBitmap, 0, 0, DISPLAY_BITMAP_WIDTH, DISPLAY_BITMAP_HEIGHT);
         }
 
         private void DrawBSP(byte[] pixels, int x, int y, int stride, int bytesPerPixel)
@@ -245,12 +248,13 @@ namespace PGToolsApp
             }
         }
 
-        private void btnRedraw_Click(object sender, EventArgs e)
+        private async void btnRedraw_Click(object sender, EventArgs e)
         {
             btnSave.Enabled = false;
             btnRedraw.Enabled = false;
             
-            Regenerate();
+            await Task.Run(() => Regenerate());
+
             Refresh();
             
             btnSave.Enabled = true;

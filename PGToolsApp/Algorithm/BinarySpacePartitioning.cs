@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace PGToolsApp
 {
@@ -63,27 +64,37 @@ namespace PGToolsApp
         public void Generate()
         {
             Array.Clear(Room, 0, Room.Length);
+            for (int y = 0; y < Info.RoomHeight; y++)
+            {
+                for (int x = 0; x < Info.RoomWidth; x++)
+                {
+                    Room[y, x] = (int)BSP_TILE_TYPE.WALL;
+                }
+            }
+
             DivideRoom(Info.Depth, 0, 0, Info.RoomWidth, Info.RoomHeight);
         }
-        
+
         RoomLocation DivideRoom(int depth, int x1, int y1, int x2, int y2)
         {
             int xLen = x2 - x1; // 너비
             int yLen = y2 - y1; // 높이
 
             // 재귀의 깊이가 도달한 경우, 방의 크기가 10x10보다 작을 경우
-            if (depth == 0 || (xLen <= 10 || yLen <= 10))
+            if (depth == 0)
             {
                 for (int y = y1 + 2; y < y2 - 2; ++y)
                 {
                     for (int x = x1 + 2; x < x2 - 2; ++x)
                     {
-                        Room[y, x] = (int)BSP_TILE_TYPE.WALL;
+                        Room[y, x] = (int)BSP_TILE_TYPE.EMPTY;
                     }
                 }
 
-                return new RoomLocation(x1 + 2, y1 + 2, x2 - 3, y2 - 3,
-                                        x1 + 2, y1 + 2, x2 - 3, y2 - 3);
+                return new RoomLocation(x1 + 2, y1 + 2,  // Top Left
+                                        x2 - 3, y2 - 3,  // Top Right
+                                        x1 + 2, y1 + 2,  // Bottom Left
+                                        x2 - 3, y2 - 3); // Bottom Right
             }
 
             RoomLocation leftRoom, rightRoom;
@@ -99,12 +110,14 @@ namespace PGToolsApp
                 rightRoom = DivideRoom(depth - 1, x1 + divideX, y1, x2, y2);
 
                 // 분할 한 뒤 정해진 방을 합친다.
-                Room[(leftRoom.y3 + leftRoom.y4) / 2, leftRoom.x4 + 1] = (int)BSP_TILE_TYPE.CORRIDOR; ;
-                Room[(leftRoom.y3 + leftRoom.y4) / 2, leftRoom.x4 + 2] = (int)BSP_TILE_TYPE.CORRIDOR; ;
-                Room[(rightRoom.y1 + rightRoom.y2) / 2, rightRoom.x1 - 1] = (int)BSP_TILE_TYPE.CORRIDOR; ;
-                Room[(rightRoom.y1 + rightRoom.y2) / 2, rightRoom.x1 - 2] = (int)BSP_TILE_TYPE.CORRIDOR; ;
+                Room[(leftRoom.y3 + leftRoom.y4) / 2, leftRoom.x4 + 1] = (int)BSP_TILE_TYPE.CORRIDOR;
+                Room[(leftRoom.y3 + leftRoom.y4) / 2, leftRoom.x4 + 2] = (int)BSP_TILE_TYPE.CORRIDOR;
+                Room[(rightRoom.y1 + rightRoom.y2) / 2, rightRoom.x1 - 1] = (int)BSP_TILE_TYPE.CORRIDOR;
+                Room[(rightRoom.y1 + rightRoom.y2) / 2, rightRoom.x1 - 2] = (int)BSP_TILE_TYPE.CORRIDOR;
+
                 int yMin = Math.Min((leftRoom.y3 + leftRoom.y4) / 2, (rightRoom.y1 + rightRoom.y2) / 2);
                 int yMax = Math.Max((leftRoom.y3 + leftRoom.y4) / 2, (rightRoom.y1 + rightRoom.y2) / 2);
+
                 for (int y = yMin; y <= yMax; ++y)
                     Room[y, rightRoom.x1 - 2] = (int)BSP_TILE_TYPE.CORRIDOR;
             }
@@ -123,8 +136,10 @@ namespace PGToolsApp
                 Room[leftRoom.y4 + 2, (leftRoom.x3 + leftRoom.x4) / 2] = (int)BSP_TILE_TYPE.CORRIDOR;
                 Room[rightRoom.y1 - 1, (rightRoom.x1 + rightRoom.x2) / 2] = (int)BSP_TILE_TYPE.CORRIDOR;
                 Room[rightRoom.y1 - 2, (rightRoom.x1 + rightRoom.x2) / 2] = (int)BSP_TILE_TYPE.CORRIDOR;
+
                 int xMin = Math.Min((leftRoom.x3 + leftRoom.x4) / 2, (rightRoom.x1 + rightRoom.x2) / 2);
                 int xMax = Math.Max((leftRoom.x3 + leftRoom.x4) / 2, (rightRoom.x1 + rightRoom.x2) / 2);
+
                 for (int x = xMin; x <= xMax; ++x)
                     Room[rightRoom.y1 - 2, x] = (int)BSP_TILE_TYPE.CORRIDOR;
             }
@@ -149,6 +164,5 @@ namespace PGToolsApp
                 Console.WriteLine();
             }
         }
-
     }
 }

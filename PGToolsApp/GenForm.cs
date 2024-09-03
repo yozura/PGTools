@@ -41,7 +41,7 @@ namespace PGToolsApp
             // Set Variable
             this.parent = parent;
         }
-        
+
         private void GenForm_Load(object sender, System.EventArgs e)
         {
             if (CurrentAlgorithm == PG_ALGORITHM.BSP)
@@ -159,12 +159,12 @@ namespace PGToolsApp
             int index = y * stride + x * bytesPerPixel;
             switch (BitmapBoard[y, x])
             {
-                case (int)BSP_TILE_TYPE.EMPTY:
+                case (int)BSP_TILE_TYPE.WALL:
                     pixels[index] = 0;
                     pixels[index + 1] = 0;
                     pixels[index + 2] = 0;
                     break;
-                case (int)BSP_TILE_TYPE.WALL:
+                case (int)BSP_TILE_TYPE.EMPTY:
                 case (int)BSP_TILE_TYPE.CORRIDOR:
                     pixels[index] = 255;
                     pixels[index + 1] = 255;
@@ -270,7 +270,7 @@ namespace PGToolsApp
             TimeMeasure.Stop();
 
             ElapsedDrawingTime = TimeMeasure.ElapsedMilliseconds / 1000.0;
-            
+
             btnSave.Enabled = true;
             btnRedraw.Enabled = true;
         }
